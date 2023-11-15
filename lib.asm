@@ -3,8 +3,8 @@
 .stack 100h
 .data
 	errorCarga 			db "error en la carga",0dh,0ah,24h
-	cantidadCaracteres 	db 0
-	direccionTexto 		dw 00
+	cantidadCaracteres 		db 0
+	direccionTexto 			dw 00
 	caracteres 			db ("0123456789ABCDEF")
 	ok 		   			db 0
 	modo		  		db 0; 0, TEXTO
