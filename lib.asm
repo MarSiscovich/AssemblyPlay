@@ -26,6 +26,9 @@ public carga ; Carga caracteres en RAM
 			 ;
 			 ; BX offset variable a llenar
 public imprimir
+public moverCursorIzq
+public llenaBlanco
+public pruebaColor
 
 carga proc
 		push cx
@@ -170,5 +173,66 @@ imprimir proc
 	ret 2
 
 imprimir endp
+
+moverCursorIzq proc 	; Mueve el cursor a la esquina superior izquierda
+	push bp 
+	mov bp, sp
+	push si
+	push di
+	push ax
+	mov si, ss:[bp+6]
+	mov di, ss:[bp+4]
+
+    mov ah, 2     		; Función 02h - Posiciona el cursor
+    int 10h       		; Llama a la interrupción 10h para posicionar el cursor
+
+    pop ax
+    pop di
+    pop si
+    pop bp 
+    ret 6
+moverCursorIzq endp
+
+llenaBlanco proc 		; Llena la pantalla con espacios en blanco
+	push bp 
+	mov bp, sp
+	push si
+	push di
+	push ax
+	mov si, ss:[bp+6]
+	mov di, ss:[bp+4]
+
+    mov ah, 9     		; Función 09h - Escribir caracter y atributo en pantalla
+    mov al, 20h   		; Carácter de espacio en blanco
+    int 10h       		; Llama a la interrupción 10h para escribir en pantalla
+
+    pop ax
+    pop di
+    pop si
+    pop bp 
+    ret 6
+llenaBlanco endp
+
+pruebaColor proc 
+	push bp 
+	mov bp, sp
+	push bx
+	push si
+	push di
+	push ax
+	mov bx, ss:[bp+8]
+	mov si, ss:[bp+6]
+	mov di, ss:[bp+4]
+
+   	mov ax, 0600h
+	int 10h
+
+    pop ax
+    pop di
+    pop si
+    pop bx
+    pop bp 
+    ret 8
+pruebaColor endp
 
 end
