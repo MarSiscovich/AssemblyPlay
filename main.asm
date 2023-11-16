@@ -13,6 +13,9 @@
 
 extrn carga:proc
 extrn imprimir:proc
+extrn moverCursorIzq:proc
+extrn llenaBlanco:proc
+extrn pruebaColor:proc
 
 main proc
 	mov ax, @data 
