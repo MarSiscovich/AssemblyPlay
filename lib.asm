@@ -14,17 +14,17 @@
 
 .code
 
-public carga ; Carga caracteres en RAM 
-			 ; Carga Finita DL= CANTIDAD o Infinita DL=0
-			 ; Caracter de Finalizacion DH=CARACTER
-			 ; 
-			 ; RESTRICCIONES POR TIPO DE CARGA (BIN, HEX, DEC, TEXTO)
-			 ; AH=0, TEXTO
-			 ; AH=1, DEC
-			 ; AH=2, HEX
-			 ; AH=3, BIN
-			 ;
-			 ; BX offset variable a llenar
+public carga 		; Carga caracteres en RAM 
+			; Carga Finita DL= CANTIDAD o Infinita DL=0
+			; Caracter de Finalizacion DH=CARACTER
+			; 
+			; RESTRICCIONES POR TIPO DE CARGA (BIN, HEX, DEC, TEXTO)
+			; AH=0, TEXTO
+			; AH=1, DEC
+			; AH=2, HEX
+			; AH=3, BIN
+			;
+			; BX offset variable a llenar
 public imprimir
 public moverCursorIzq
 public llenaBlanco
@@ -33,7 +33,7 @@ public pruebaColor
 carga proc
 		push cx
 		push bx
-
+		
 		mov cantidadCaracteres, dl
 		mov direccionTexto, bx
 		mov modo, ah
@@ -150,12 +150,12 @@ checkCaracter proc ;RECIBE EN AL UN CARACTER y DEPENDIENDO DEL VALOR DE LA VARIB
 		mov ok, 1
 		jmp finCheckCaracter
 
-finCheckCaracter:
-	pop si
-	pop cx
-
-	ret
-	checkCaracter endp
+	finCheckCaracter:
+		pop si
+		pop cx
+	
+		ret
+checkCaracter endp
 
 imprimir proc
 	push bp
@@ -174,7 +174,7 @@ imprimir proc
 
 imprimir endp
 
-moverCursorIzq proc 	; Mueve el cursor a la esquina superior izquierda
+moverCursorIzq proc 		; Mueve el cursor a la esquina superior izquierda
 	push bp 
 	mov bp, sp
 	push si
@@ -183,14 +183,14 @@ moverCursorIzq proc 	; Mueve el cursor a la esquina superior izquierda
 	mov si, ss:[bp+6]
 	mov di, ss:[bp+4]
 
-    mov ah, 2     		; Función 02h - Posiciona el cursor
-    int 10h       		; Llama a la interrupción 10h para posicionar el cursor
-
-    pop ax
-    pop di
-    pop si
-    pop bp 
-    ret 6
+	mov ah, 2     		; Función 02h - Posiciona el cursor
+	int 10h       		; Llama a la interrupción 10h para posicionar el cursor
+	
+	pop ax
+	pop di
+	pop si
+	pop bp 
+	ret 6
 moverCursorIzq endp
 
 llenaBlanco proc 		; Llena la pantalla con espacios en blanco
@@ -202,15 +202,15 @@ llenaBlanco proc 		; Llena la pantalla con espacios en blanco
 	mov si, ss:[bp+6]
 	mov di, ss:[bp+4]
 
-    mov ah, 9     		; Función 09h - Escribir caracter y atributo en pantalla
-    mov al, 20h   		; Carácter de espacio en blanco
-    int 10h       		; Llama a la interrupción 10h para escribir en pantalla
-
-    pop ax
-    pop di
-    pop si
-    pop bp 
-    ret 6
+	mov ah, 9     		; Función 09h - Escribir caracter y atributo en pantalla
+	mov al, 20h   		; Carácter de espacio en blanco
+	int 10h       		; Llama a la interrupción 10h para escribir en pantalla
+	
+	pop ax
+	pop di
+	pop si
+	pop bp 
+	ret 6
 llenaBlanco endp
 
 pruebaColor proc 
@@ -227,12 +227,12 @@ pruebaColor proc
    	mov ax, 0600h
 	int 10h
 
-    pop ax
-    pop di
-    pop si
-    pop bx
-    pop bp 
-    ret 8
+	pop ax
+	pop di
+	pop si
+	pop bx
+	pop bp 
+	ret 8
 pruebaColor endp
 
 end
