@@ -2,12 +2,12 @@
 .model small
 .stack 100h
 .data
-	errorCarga 			db "error en la carga",0dh,0ah,24h
+	errorCarga 				db "error en la carga",0dh,0ah,24h
 	cantidadCaracteres 		db 0
 	direccionTexto 			dw 00
-	caracteres 			db ("0123456789ABCDEF")
-	ok 		   			db 0
-	modo		  		db 0; 0, TEXTO
+	caracteres 				db ("0123456789ABCDEF")
+	ok 		   				db 0
+	modo		  			db 0; 0, TEXTO
 							; 1, DEC
 							; 2, HEX
 							; 3, BIN 
@@ -15,16 +15,16 @@
 .code
 
 public carga 		; Carga caracteres en RAM 
-			; Carga Finita DL= CANTIDAD o Infinita DL=0
-			; Caracter de Finalizacion DH=CARACTER
-			; 
-			; RESTRICCIONES POR TIPO DE CARGA (BIN, HEX, DEC, TEXTO)
-			; AH=0, TEXTO
-			; AH=1, DEC
-			; AH=2, HEX
-			; AH=3, BIN
-			;
-			; BX offset variable a llenar
+					; Carga Finita DL= CANTIDAD o Infinita DL=0
+					; Caracter de Finalizacion DH=CARACTER
+					; 
+					; RESTRICCIONES POR TIPO DE CARGA (BIN, HEX, DEC, TEXTO)
+					; AH=0, TEXTO
+					; AH=1, DEC
+					; AH=2, HEX
+					; AH=3, BIN
+					;
+					; BX offset variable a llenar
 public imprimir
 public moverCursorIzq
 public llenaBlanco
@@ -43,7 +43,7 @@ carga proc
 		cmp dl,0
 		je infinita
 		mov cl, cantidadCaracteres
-
+		
 	finita:
 		mov ah, 1
 		int 21h
@@ -190,7 +190,7 @@ moverCursorIzq proc 		; Mueve el cursor a la esquina superior izquierda
 	pop di
 	pop si
 	pop bp 
-	ret 6
+	ret 8
 moverCursorIzq endp
 
 llenaBlanco proc 		; Llena la pantalla con espacios en blanco
@@ -232,7 +232,7 @@ pruebaColor proc
 	pop si
 	pop bx
 	pop bp 
-	ret 8
+	ret 6
 pruebaColor endp
 
 end
