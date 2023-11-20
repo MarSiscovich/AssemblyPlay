@@ -156,7 +156,7 @@ instrucciones:
 
 creditos:
 
-finPrograma:
+finPrograma:	;Fin de ejecucion del programa
 	mov ax, 4c00h
 	int 21h
 main endp
