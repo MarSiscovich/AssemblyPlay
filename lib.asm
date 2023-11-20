@@ -2,12 +2,13 @@
 .model small
 .stack 100h
 .data
-	errorCarga 				db "error en la carga",0dh,0ah,24h
+	errorCarga 				db " |error en la carga| INTENTE NUEVAMENTE...",0dh,0ah,24h
 	cantidadCaracteres 		db 0
 	direccionTexto 			dw 00
 	caracteres 				db ("0123456789ABCDEF")
 	ok 		   				db 0
-	modo		  			db 0; 0, TEXTO
+	modo		  			db 0
+							; 0, TEXTO
 							; 1, DEC
 							; 2, HEX
 							; 3, BIN 
@@ -202,8 +203,7 @@ llenaBlanco proc 		; Llena la pantalla con espacios en blanco
 	mov si, ss:[bp+6]
 	mov di, ss:[bp+4]
 
-	mov ah, 9     		; Función 09h - Escribir caracter y atributo en pantalla
-	mov al, 20h   		; Carácter de espacio en blanco
+	mov ah, 06h     	; Funcion 06h: Borrar la pantalla
 	int 10h       		; Llama a la interrupción 10h para escribir en pantalla
 	
 	pop ax
@@ -236,3 +236,4 @@ pruebaColor proc
 pruebaColor endp
 
 end
+
