@@ -27,17 +27,23 @@
 				db "",0dh,0ah
 				db "",0dh,0ah,24h
 
-	instruct	db "    ____             __                          _                      ",0dh,0ah
-				db "   /  _/  ___   ___ / /_  ____ __ __ ____ ____  (_) ___   ___  ___   ___",0dh,0ah
-				db "  _/ /   / _ \ (_-</ __/ / __// // // __// __/ / / / _ \ / _ \/ -_) (_-<",0dh,0ah
-				db " /___/  /_//_//___/\__/ /_/   \_,_/ \__/ \__/ /_/  \___//_//_/\__/ /___/",0dh,0ah
+	instruct	db "    ___               _                            _                         ",0dh,0ah
+ 				db "   |_ _|  _ _    ___ | |_   _ _   _  _   __   __  (_)  ___   _ _    ___   ___",0dh,0ah
+				db "    | |  | ' \  (_-< |  _| | '_| | || | / _| / _| | | / _ \ | ' \  / -_) (_-<",0dh,0ah
+ 				db "   |___| |_||_| /__/  \__| |_|    \_,_| \__| \__| |_| \___/ |_||_| \___| /__/",0dh,0ah
 				db "",0dh,0ah
 				db "",0dh,0ah
 				db "",0dh,0ah
-				db "           - EL COCODRILO SE MUEVE CON LAS TECLAS: (' ',' ')",0dh,0ah
-				db "           - El OBJETIVO ES: ",0dh,0ah
-				db "           -  ",0dh,0ah
-				db "           -  ",0dh,0ah
+				db "         - EL COCODRILO SE MUEVE CON LAS TECLAS: (' ',' ')",0dh,0ah
+				db "         - El OBJETIVO ES: ",0dh,0ah
+				db "         - ",0dh,0ah
+				db "         - ",0dh,0ah
+				db "         - ",0dh,0ah
+				db "         - ",0dh,0ah
+				db "         - ",0dh,0ah
+				db "         - ",0dh,0ah
+				db "         - ",0dh,0ah
+				db "",0dh,0ah
 				db "",0dh,0ah
 				db "",0dh,0ah
 				db "",0dh,0ah,24h
@@ -188,14 +194,11 @@ instrucciones:
 	call pruebaColor
 ;---------fin prueba---------
 
-	mov bx, offset titulo
-	push bx 
-	call imprimir
-
 	mov bx, offset instruct
 	push bx 
 	call imprimir
 	jmp finprograma
+
 creditos:
 	jmp finprograma
 
@@ -203,4 +206,4 @@ finPrograma:
 	mov ax, 4c00h
 	int 21h
 main endp
-end	
+end
