@@ -27,26 +27,31 @@
 				db "",0dh,0ah
 				db "",0dh,0ah,24h
 
-	instruct	db "    ___               _                            _                         ",0dh,0ah
+instruct		db "    ___               _                            _                         ",0dh,0ah
  				db "   |_ _|  _ _    ___ | |_   _ _   _  _   __   __  (_)  ___   _ _    ___   ___",0dh,0ah
 				db "    | |  | ' \  (_-< |  _| | '_| | || | / _| / _| | | / _ \ | ' \  / -_) (_-<",0dh,0ah
  				db "   |___| |_||_| /__/  \__| |_|    \_,_| \__| \__| |_| \___/ |_||_| \___| /__/",0dh,0ah
 				db "",0dh,0ah
 				db "",0dh,0ah
 				db "",0dh,0ah
-				db "         - EL COCODRILO SE MUEVE CON LAS TECLAS: (' ',' ')",0dh,0ah
-				db "         - El OBJETIVO ES: ",0dh,0ah
+				db "         - EL COCODRILO SE MUEVE CON LAS TECLAS: ('A','D')",0dh,0ah
+				db "         - El OBJETIVO ES: Comerme la mayor cantidad de bolas frescas y limpias ",0dh,0ah
+				db "         - vas a perder una vida si se te cae una bola, si perdes los 3 corazones fuiste, sos cartera lacoste",0dh,0ah
 				db "         - ",0dh,0ah
 				db "         - ",0dh,0ah
 				db "         - ",0dh,0ah
 				db "         - ",0dh,0ah
 				db "         - ",0dh,0ah
-				db "         - ",0dh,0ah
-				db "         - ",0dh,0ah
+				db "         -",0dh,0ah
 				db "",0dh,0ah
 				db "",0dh,0ah
 				db "",0dh,0ah
-				db "",0dh,0ah,24h
+				db "!INGRESE CUALQUIER NUMERO PARA VOLVER AL MENU! ",0dh,0ah,24h
+
+creditos		db "",0dh,0ah
+				db "",0dh,0ah
+				db "",0dh,0ah
+				db"",0dh,0ah,24h
 
 	coraVacio   db "     ____         ____               ", 0dh, 0ah
 				db "   _|____|_     _|____|_            ", 0dh, 0ah
@@ -76,11 +81,14 @@
 				db "  	    |_|_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _|_|			",0dh,0ah	
 				db "          |_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|			",0dh,0ah,24h
 	
+	error 		db "INGRESE UNA OPCION VALIDA.",0dh,0ah,24h
+	
 	opcion		db 0
 
 .code
 
 extrn carga:proc
+extrn 
 extrn imprimir:proc
 extrn moverCursorIzq:proc
 extrn llenaBlanco:proc
@@ -89,8 +97,8 @@ extrn pruebaColor:proc
 main proc
 	mov ax, @data 
 	mov ds, ax
-comienzo:
 
+comienzo:
 ;---------limpiado de pantalla--------
 	; Mueve el cursor a la esquina superior izquierda
 
@@ -101,11 +109,10 @@ comienzo:
 	push dx
 	call moverCursorIzq
 
-	mov bh, 0     						; Página de video (normalmente 0)
-	push bx
-	mov cx, 0    		 				; Número de veces que se repetirá la escritura (limpia toda la pantalla)
-	push cx
-	call llenaBlanco 					; Llena la pantalla con espacios en blanco
+	mov ah, 0fh
+	int 10h
+	mov ah, 0
+	int 10h			;LIMPIEZA DE PANTALLA CONVERTIR EN LIBRERIA
 ;---------fin limpiado----------------
 
 ;---------prueba color-------
@@ -139,8 +146,8 @@ comienzo:
 	mov bx, offset menu
 	push bx 
 	call imprimir
-;---------fin impresion menu---------			
-
+;---------fin impresion menu---------	
+cargas:
 ;---------carga de la opcion---------
 
 	mov bx, offset opcion
@@ -165,9 +172,9 @@ comienzo:
 	mov ah, 0fh
 	int 10h
 	mov ah, 0
-	int 10h
+	int 10h			;LIMPIEZA DE PANTALLA CONVERTIR EN LIBRERIA
 ;---------fin limpiado----------------
-
+;---------Comparaciones----------------
 	cmp opcion, 1
 	je jugar
 
@@ -175,12 +182,28 @@ comienzo:
 	je instrucciones
 
 	cmp opcion, 3
-	je creditos
+	je creditoss
 	
 	cmp opcion, 4
 	je finprograma
-
+	;---------prueba color-------
+		mov bh, 10
+		push bx
+		mov ch, 0							; Punto inicial hacia abajo
+		mov cl, 0							; Punto inicial hacia la derecha
+		push cx
+		mov dh, 50							; Filas 
+		mov dl, 80 							; Columnas
+		push dx
+		call pruebaColor
+	;---------fin prueba---------
+	mov bx, offset error
+	push bx 
+	call imprimir
+	jmp cargas
+;---------fin comparaciones----------------
 jugar:
+;jmp finPrograma
 instrucciones:
 ;---------prueba color-------
 	mov bh, 10
@@ -197,10 +220,39 @@ instrucciones:
 	mov bx, offset instruct
 	push bx 
 	call imprimir
-	jmp finprograma
+	mov bx, offset opcion
+    push bx
+	mov dl, 1
+	push dx
+	mov ah, 1
+	push ax
+	call carga
+	jmp comienzo
 
-creditos:
-	jmp finprograma
+creditoss:
+;---------prueba color-------
+	mov bh, 10
+	push bx
+	mov ch, 0							; Punto inicial hacia abajo
+	mov cl, 0							; Punto inicial hacia la derecha
+	push cx
+	mov dh, 50							; Filas 
+	mov dl, 80 							; Columnas
+	push dx
+	call pruebaColor
+;---------fin prueba---------
+
+	mov bx, offset creditos
+	push bx 
+	call imprimir
+	mov bx, offset opcion
+    push bx
+	mov dl, 1
+	push dx
+	mov ah, 1
+	push ax
+	call carga
+	jmp comienzo
 
 finPrograma:
 	mov ax, 4c00h
