@@ -51,10 +51,10 @@
 				db "",0dh,0ah
 				db "!INGRESE CUALQUIER NUMERO PARA VOLVER AL MENU! ",0dh,0ah,24h
 
-	creditos	db"                            _   _   _                      ",0dh,0ah               
- 			    db"    ___   _ __    ___    __| | (_) | |_    ___    ___      ",0dh,0ah
- 			    db"   / __| | '__|  / _ \  / _` | | | | __|  / _ \  / __|  o  ",0dh,0ah
- 			    db"  | (__  | |    |  __/ | (_| | | | | |_  | (_) | \__ \  o  ",0dh,0ah
+	creditos	db"    ___                     _   _   _                      ",0dh,0ah               
+ 			    db"   / __|  ____    ___    __| | (_) | |_    ___    ___      ",0dh,0ah
+ 			    db"  | |    |  __|  / _ \  / _` | | | | __|  / _ \  / __|  o  ",0dh,0ah
+ 			    db"  | |__  | |    |  __/ | (_| | | | | |_  | (_) | \__ \  o  ",0dh,0ah
  				db"   \___| |_|     \___|  \__,_| |_|  \__|  \___/  |___/     ",0dh,0ah
  				db "",0dh,0ah
 				db "",0dh,0ah
@@ -64,7 +64,7 @@
 				db "      -Lorenzo (el proplayer de osu) Graizzaro ",0dh,0ah
 				db "      -Damian (el alcoholico) Cabral",0dh,0ah
 				db "      -Agustin (el esclavo del mac) Lopez ",0dh,0ah
-				db "      -julian (el desamparado) barberis",0dh,0ah 
+				db "      -Julian (el desamparado) Barberis",0dh,0ah 
 				db "",0dh,0ah
 				db "",0dh,0ah
 				db "",0dh,0ah
