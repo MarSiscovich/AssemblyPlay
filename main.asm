@@ -48,30 +48,10 @@ instruct		db "    ___               _                            _              
 				db "",0dh,0ah
 				db "!INGRESE CUALQUIER NUMERO PARA VOLVER AL MENU! ",0dh,0ah,24h
 
-creditos	    db"                            _   _   _                      ",0dh,0ah               
- 			    db"    ___   _ __    ___    __| | (_) | |_    ___    ___      ",0dh,0ah
- 			    db"   / __| | '__|  / _ \  / _` | | | | __|  / _ \  / __|     ",0dh,0ah
- 			    db"  | (__  | |    |  __/ | (_| | | | | |_  | (_) | \__ \     ",0dh,0ah
- 				db"   \___| |_|     \___|  \__,_| |_|  \__|  \___/  |___/     ",0dh,0ah
- 				db "",0dh,0ah
+	creditos	db "",0dh,0ah
 				db "",0dh,0ah
 				db "",0dh,0ah
- 				db "         -Martina (la jefa) Siscovich",0dh,0ah
-				db "         -Santiago (el amante de microsoft) Rodriguez ",0dh,0ah
-				db "         -Lorenzo (el proplayer osu) Graizzaro ",0dh,0ah
-				db "         -Damian (el alcoholico) Cabral",0dh,0ah
-				db "         -Agustin (el esclavo del mac) Lopez ",0dh,0ah
-				db "         -julian (el desamparado) barberis",0dh,0ah 
-				db "",0dh,0ah
-				db "",0dh,0ah
-				db "",0dh,0ah
-				db "",0dh,0ah
-				db "!INGRESE CUALQUIER NUMERO PARA VOLVER AL MENU! ",0dh,0ah,24h
-
-                                                     
-				db "",0dh,0ah
-				db "",0dh,0ah
-				db"",0dh,0ah,24h
+				db "",0dh,0ah,24h
 
 	coraVacio   db "     ____         ____               ", 0dh, 0ah
 				db "   _|____|_     _|____|_            ", 0dh, 0ah
@@ -103,7 +83,7 @@ creditos	    db"                            _   _   _                      ",0dh
 	
 	error 		db "INGRESE UNA OPCION VALIDA.",0dh,0ah,24h
 	
-	opcion		db 0
+	opcion		db "x"
 
 .code
 
@@ -170,13 +150,10 @@ comienzo:
 cargas:
 ;---------carga de la opcion---------
 
-	mov bx, offset opcion
-	push bx
-	mov dl, 1
-	push dx
 	mov ah, 1
-	push ax
-	call carga
+	int 21h
+	mov [opcion], al
+
 ;---------fin de la carga de la opcion---------
 
 ;---------limpiado de pantalla--------
@@ -195,17 +172,21 @@ cargas:
 	int 10h			;LIMPIEZA DE PANTALLA CONVERTIR EN LIBRERIA
 ;---------fin limpiado----------------
 ;---------Comparaciones----------------
-	cmp opcion, 1
+menuComp:
+	cmp opcion, '1'
 	je jugar
 
-	cmp opcion, 2
+	cmp opcion, '2'
 	je instrucciones
 
-	cmp opcion, 3
+	cmp opcion, '3'
 	je creditoss
 	
-	cmp opcion, 4
+	cmp opcion, '4'
 	je finprograma
+;si no se ingresa una opcion válida...
+	jmp cargas
+
 	;---------prueba color-------
 		mov bh, 10
 		push bx
@@ -223,6 +204,7 @@ cargas:
 	jmp cargas
 ;---------fin comparaciones----------------
 jugar:
+
 ;jmp finPrograma
 instrucciones:
 ;---------prueba color-------
