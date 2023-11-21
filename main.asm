@@ -110,7 +110,6 @@
 .code
 
 	extrn carga:proc
-	extrn 
 	extrn imprimir:proc
 	extrn moverCursorIzq:proc
 	extrn llenaBlanco:proc
