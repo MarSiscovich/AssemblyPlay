@@ -27,7 +27,7 @@
 				db "",0dh,0ah
 				db "",0dh,0ah,24h
 
-instruct		db "",0dh,0ah
+	instruct		db "",0dh,0ah
 				db "   ___               _                            _                          ",0dh,0ah
  				db "  |_ _|  _ _    ___ | |_   _ _   _  _   __   __  (_)  ___   _ _    ___   ___ ",0dh,0ah
 				db "   | |  | ' \  (_-< |  _| | '_| | || | / _| / _| | | / _ \ | ' \  / -_) (_-< ",0dh,0ah
@@ -109,105 +109,33 @@ instruct		db "",0dh,0ah
 
 .code
 
-extrn carga:proc
-extrn 
-extrn imprimir:proc
-extrn moverCursorIzq:proc
-extrn llenaBlanco:proc
-extrn pruebaColor:proc
+	extrn carga:proc
+	extrn 
+	extrn imprimir:proc
+	extrn moverCursorIzq:proc
+	extrn llenaBlanco:proc
+	extrn pruebaColor:proc
 
-main proc
-	mov ax, @data 
-	mov ds, ax
+	main proc
+		mov ax, @data 
+		mov ds, ax
 
-comienzo:
-;---------limpiado de pantalla--------
-	; Mueve el cursor a la esquina superior izquierda
+	comienzo:
+	;---------limpiado de pantalla--------
+		; Mueve el cursor a la esquina superior izquierda
 
-	mov bh, 0     ; Página de video (normalmente 0)
-	push bx
-	mov dh, 0     ; Fila
-	mov dl, 0     ; Columna
-	push dx
-	call moverCursorIzq
+		mov bh, 0     ; Página de video (normalmente 0)
+		push bx
+		mov dh, 0     ; Fila
+		mov dl, 0     ; Columna
+		push dx
+		call moverCursorIzq
 
-	mov ah, 0fh
-	int 10h
-	mov ah, 0
-	int 10h			;LIMPIEZA DE PANTALLA CONVERTIR EN LIBRERIA
-;---------fin limpiado----------------
-
-;---------prueba color-------
-	mov bh, 10
-	push bx
-	mov ch, 0							; Punto inicial hacia abajo
-	mov cl, 0							; Punto inicial hacia la derecha
-	push cx
-	mov dh, 50							; Filas 
-	mov dl, 80 							; Columnas
-	push dx
-	call pruebaColor
-;---------fin prueba---------
-
-;---------impresion del menu---------
-	mov bx, offset titulo
-	push bx 
-	call imprimir
-	
-	mov bh, 0  				
-	push bx					
-	mov dh, 8 				
-	mov dl, 8 				
-	push dx					 
-	call moverCursorIzq ;Mueve el cursor al final del programa
-
-	mov bx, offset subt
-	push bx 
-	call imprimir
-
-	mov bx, offset menu
-	push bx 
-	call imprimir
-;---------fin impresion menu---------	
-cargas:
-;---------carga de la opcion---------
-
-	mov ah, 1
-	int 21h
-	mov [opcion], al
-
-;---------fin de la carga de la opcion---------
-
-;---------limpiado de pantalla--------
-	; Mueve el cursor a la esquina superior izquierda
-
-	mov bh, 0     ; Página de video (normalmente 0)
-	push bx
-	mov dh, 0     ; Fila
-	mov dl, 0     ; Columna
-	push dx
-	call moverCursorIzq
-
-	mov ah, 0fh
-	int 10h
-	mov ah, 0
-	int 10h			;LIMPIEZA DE PANTALLA CONVERTIR EN LIBRERIA
-;---------fin limpiado----------------
-;---------Comparaciones----------------
-menuComp:
-	cmp opcion, '1'
-	je jugar
-
-	cmp opcion, '2'
-	je instrucciones
-
-	cmp opcion, '3'
-	je creditoss
-	
-	cmp opcion, '4'
-	je finprograma
-;si no se ingresa una opcion válida...
-	jmp cargas
+		mov ah, 0fh
+		int 10h
+		mov ah, 0
+		int 10h			;LIMPIEZA DE PANTALLA CONVERTIR EN LIBRERIA
+	;---------fin limpiado----------------
 
 	;---------prueba color-------
 		mov bh, 10
@@ -220,65 +148,153 @@ menuComp:
 		push dx
 		call pruebaColor
 	;---------fin prueba---------
-	mov bx, offset error
-	push bx 
-	call imprimir
-	jmp cargas
-;---------fin comparaciones----------------
-jugar:
-jmp finPrograma
-instrucciones:
-;---------prueba color-------
-	mov bh, 10
-	push bx
-	mov ch, 0							; Punto inicial hacia abajo
-	mov cl, 0							; Punto inicial hacia la derecha
-	push cx
-	mov dh, 50							; Filas 
-	mov dl, 80 							; Columnas
-	push dx
-	call pruebaColor
-;---------fin prueba---------
 
-	mov bx, offset instruct
-	push bx 
-	call imprimir
-	mov bx, offset opcion
-    push bx
-	mov dl, 1
-	push dx
-	mov ah, 1
-	push ax
-	call carga
-	jmp comienzo
+	;---------impresion del menu---------
+		mov bx, offset titulo
+		push bx 
+		call imprimir
+		
+		mov bh, 0  				
+		push bx					
+		mov dh, 8 				
+		mov dl, 8 				
+		push dx					 
+		call moverCursorIzq ;Mueve el cursor al final del programa
 
-creditoss:
-;---------prueba color-------
-	mov bh, 10
-	push bx
-	mov ch, 0							; Punto inicial hacia abajo
-	mov cl, 0							; Punto inicial hacia la derecha
-	push cx
-	mov dh, 50							; Filas 
-	mov dl, 80 							; Columnas
-	push dx
-	call pruebaColor
-;---------fin prueba---------
+		mov bx, offset subt
+		push bx 
+		call imprimir
 
-	mov bx, offset creditos
-	push bx 
-	call imprimir
-	mov bx, offset opcion
-    push bx
-	mov dl, 1
-	push dx
-	mov ah, 1
-	push ax
-	call carga
-	jmp comienzo
+		mov bx, offset menu
+		push bx 
+		call imprimir
+	;---------fin impresion menu---------	
+	cargas:
+	;---------carga de la opcion---------
 
-finPrograma:
-	mov ax, 4c00h
-	int 21h
-main endp
+		mov ah, 1
+		int 21h
+		mov [opcion], al
+
+	;---------fin de la carga de la opcion---------
+
+	;---------limpiado de pantalla--------
+		; Mueve el cursor a la esquina superior izquierda
+
+		mov bh, 0     ; Página de video (normalmente 0)
+		push bx
+		mov dh, 0     ; Fila
+		mov dl, 0     ; Columna
+		push dx
+		call moverCursorIzq
+
+		mov ah, 0fh
+		int 10h
+		mov ah, 0
+		int 10h			;LIMPIEZA DE PANTALLA CONVERTIR EN LIBRERIA
+	;---------fin limpiado----------------
+
+	;---------Comparaciones----------------
+	menuComp:
+		cmp opcion, '1'
+		je jugar
+
+		cmp opcion, '2'
+		je instrucciones
+
+		cmp opcion, '3'
+		je creditoss
+		
+		cmp opcion, '4'
+		je finprograma
+	;si no se ingresa una opcion válida...
+		jmp cargas
+
+		;---------prueba color-------
+			mov bh, 10
+			push bx
+			mov ch, 0							; Punto inicial hacia abajo
+			mov cl, 0							; Punto inicial hacia la derecha
+			push cx
+			mov dh, 50							; Filas 
+			mov dl, 80 							; Columnas
+			push dx
+			call pruebaColor
+		;---------fin prueba---------
+		mov bx, offset error
+		push bx 
+		call imprimir
+		jmp cargas
+	;---------fin comparaciones----------------
+	jugar:
+	;---------limpiado de pantalla--------
+		; Mueve el cursor a la esquina superior izquierda
+
+		mov bh, 0     ; Página de video (normalmente 0)
+		push bx
+		mov dh, 0     ; Fila
+		mov dl, 0     ; Columna
+		push dx
+		call moverCursorIzq
+
+		mov ah, 0fh
+		int 10h
+		mov ah, 0
+		int 10h			;LIMPIEZA DE PANTALLA CONVERTIR EN LIBRERIA
+	;---------fin limpiado----------------
+	jmp finPrograma
+	instrucciones:
+	;---------prueba color-------
+		mov bh, 10
+		push bx
+		mov ch, 0							; Punto inicial hacia abajo
+		mov cl, 0							; Punto inicial hacia la derecha
+		push cx
+		mov dh, 50							; Filas 
+		mov dl, 80 							; Columnas
+		push dx
+		call pruebaColor
+	;---------fin prueba---------
+
+		mov bx, offset instruct
+		push bx 
+		call imprimir
+		mov bx, offset opcion
+		push bx
+		mov dl, 1
+		push dx
+		mov ah, 1
+		push ax
+		call carga
+		jmp comienzo
+
+	creditoss:
+	;---------prueba color-------
+		mov bh, 10
+		push bx
+		mov ch, 0							; Punto inicial hacia abajo
+		mov cl, 0							; Punto inicial hacia la derecha
+		push cx
+		mov dh, 50							; Filas 
+		mov dl, 80 							; Columnas
+		push dx
+		call pruebaColor
+	;---------fin prueba---------
+
+		mov bx, offset creditos
+		push bx 
+		call imprimir
+		mov bx, offset opcion
+		push bx
+		mov dl, 1
+		push dx
+		mov ah, 1
+		push ax
+		call carga
+		jmp comienzo
+
+	finPrograma:
+		mov ax, 4c00h
+		int 21h
+	main endp
 end
