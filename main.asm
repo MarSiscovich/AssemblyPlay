@@ -242,7 +242,7 @@
 		mov ah, 0
 		int 10h			;LIMPIEZA DE PANTALLA CONVERTIR EN LIBRERIA
 	;---------fin limpiado----------------
-	jmp finPrograma
+	jmp comienzo
 	instrucciones:
 	;---------prueba color-------
 		mov bh, 10
