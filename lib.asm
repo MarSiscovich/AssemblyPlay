@@ -620,7 +620,7 @@ resetear PROC
 
     ; Inicializar vidas con ' x5'
     MOV SI, OFFSET vidas
-    MOV byte ptr [SI + 2], '0'
+    MOV byte ptr [SI + 2], '5'
 
     ; Inicializar heart con 03h (carácter de corazón)
     MOV heart, 03h
