@@ -2,15 +2,15 @@
 .model small
 .stack 100h
 .data
-	errorCarga 		db "error en la carga",0dh,0ah,24h
-	cantidadCaracteres 	db 0
-	direccionTexto 		dw 00
-	caracteres 		db ("0123456789ABCDEF")
-	ok 		   	db 0
-	modo		  	db 0 			; 0, TEXTO
-							; 1, DEC
-							; 2, HEX
-							; 3, BIN 
+		errorCarga 		db "error en la carga",0dh,0ah,24h
+		cantidadCaracteres 	db 0
+		direccionTexto 		dw 00
+		caracteres 		db ("0123456789ABCDEF")
+		ok 		   	db 0
+		modo		  	db 0 			; 0, TEXTO
+								; 1, DEC
+								; 2, HEX
+								; 3, BIN 
 	;Datos del Juego
 		ancho_pantalla DW 115h             ; the width of the window (320 pixels)
 		altura_pantalla DW 0C8h            ; the height of the window (200 pixels)
@@ -35,16 +35,16 @@
 
 		scoreTitle db "SCORE: ", 24h
 
-		vidas db '5',24h
+		vidas db ' x5',24h
 
-		heart db "x <3",24h
+		heart db 03h, 24h
 
 		cocodrilo_x DW 87h                  ; current X position of the left paddle
 		cocodrilo_y DW 0B2h                 ; current Y position of the left paddle
 
 		ancho_cocodrilo DW 20h              ; default paddle width
 		altura_cocodrilo DW 14h             ; default paddle height
-		velocidad_cocodrilo DW 14h          ; default paddle velocity
+		velocidad_cocodrilo DW 16h          ; default paddle velocity
 	;Datos del menu y resto
 
 .code
@@ -502,7 +502,7 @@
 			INT 10h		
 			
 			MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
-			LEA DX,vidas    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
+			LEA DX,heart    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
 			INT 21h                          ;print the string
 			
 			MOV AH,02h                       ;set cursor position
@@ -512,7 +512,7 @@
 			INT 10h		
 			
 			MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
-			LEA DX,heart    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
+			LEA DX,vidas    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
 			INT 21h                          ;print the string
 			
 			RET
