@@ -11,20 +11,7 @@
 
 		tiempo_aux DB 0   
 
-		puntos_texto DB '0000','$'         ; text with the player two points
 
-		scoreTitle db "SCORE: ", 24h
-
-		vidas db '5',24h
-
-		heart db "x <3",24h
-
-		cocodrilo_x DW 87h                  ; current X position of the left paddle
-		cocodrilo_y DW 0B2h                 ; current Y position of the left paddle
-
-		ancho_cocodrilo DW 20h              ; default paddle width
-		altura_cocodrilo DW 14h             ; default paddle height
-		velocidad_cocodrilo DW 0Fh          ; default paddle velocity
 	;Datos del menu y resto
 		titulo		db "",0dh,0ah
 					db "",0dh,0ah
@@ -100,34 +87,6 @@
 					db "",0dh,0ah
 					db "!INGRESE CUALQUIER NUMERO PARA VOLVER AL MENU! ",0dh,0ah,24h
 
-		coraVacio   db "     ____         ____               ", 0dh, 0ah
-					db "   _|____|_     _|____|_            ", 0dh, 0ah
-					db " _|_|    |_| _ |_|    |_|_          ", 0dh, 0ah
-					db "|_|         |_|         |_|         ", 0dh, 0ah
-					db "|_|                     |_|         ", 0dh, 0ah
-					db "|_|_                   _|_|         ", 0dh, 0ah
-					db " |_|_                 _|_|           ", 0dh, 0ah
-					db "   |_|_             _|_|             ", 0dh, 0ah
-					db "     |_|_         _|_|               ", 0dh, 0ah
-					db "       |_|_     _|_|                 ", 0dh, 0ah
-					db "          |_|_|_|                     ", 0dh, 0ah
-					db "            |_|                       ", 0dh, 0ah, 24h		
-
-		cocodrilo   db "					     _ _ _           _ _ _				",0dh,0ah	
-					db "					   _|_|_|_|_	    |_|_|_|_			",0dh,0ah	
-					db "		       			 _|_|	  |_| _	  _|_|    |_|_			",0dh,0ah	
-					db "	     _ _ _	   		|_|	_    |_|_|_|        |_|       ",0dh,0ah	
-					db "	   _|_|_|_|_  		   	|_|    |_|   |_|_|_|  |_|   |_|			",0dh,0ah	
-					db "	 _|_|	  |_|_ _ _ _ _ _ _ _ _ _|_|    |_|	      |_|   |_|			",0dh,0ah	
-					db "  	|_|	    |_|_|_|_|_|_|_|_|_|_|_|    |_|            |_|   |_|  	",0dh,0ah	
-					db " 	|_|						            |_|			",0dh,0ah	
-					db " 	|_|					      		    |_|			",0dh,0ah	
-					db " 	|_|       _   _   _   _	  _   _			      	    |_|			",0dh,0ah	
-					db " 	|_|_    _|_|_|_|_|_|_|_|_|_|_|_|_ 			    |_|			",0dh,0ah	
-					db " 	  |_|_ |_| |_| |_| |_| |_| |_| |_|			    |_|			",0dh,0ah	
-					db "  	    |_|_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _|_|			",0dh,0ah	
-					db "          |_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|			",0dh,0ah,24h
-		
 		error 		db "INGRESE UNA OPCION VALIDA.",0dh,0ah,24h
 		
 		opcion		db "x"
@@ -137,8 +96,13 @@
 	extrn carga:proc
 	extrn imprimir:proc
 	extrn moverCursorIzq:proc
-	extrn llenaBlanco:proc
 	extrn pruebaColor:proc
+	extrn limpiarPantalla:proc
+	extrn moverCocodrilo:proc
+	extrn limpiar:proc
+	extrn dibujarInterfaz:proc
+	extrn dibujarCocodrilo:proc
+	public EXIT_GAME
 
 	main proc
 		mov ax, @data 
@@ -155,10 +119,8 @@
 			push dx
 			call moverCursorIzq
 
-			mov ah, 0fh
-			int 10h
-			mov ah, 0
-			int 10h			;LIMPIEZA DE PANTALLA CONVERTIR EN LIBRERIA
+			call limpiarPantalla
+
 		;---------fin limpiado----------------
 
 		;---------prueba color-------
@@ -194,12 +156,11 @@
 			call imprimir
 		;---------fin impresion menu---------	
 		cargas:
-		;---------carga de la opcion---------
-
+		;---------carga de la opcion---------¿
+			mov bx, offset opcion
+			mov dl, 1
 			mov ah, 1
-			int 21h
-			mov [opcion], al
-
+			call carga
 		;---------fin de la carga de la opcion---------
 
 		;---------limpiado de pantalla--------
@@ -212,10 +173,7 @@
 			push dx
 			call moverCursorIzq
 
-			mov ah, 0fh
-			int 10h
-			mov ah, 0
-			int 10h			;LIMPIEZA DE PANTALLA CONVERTIR EN LIBRERIA
+			call limpiarPantalla
 		;---------fin limpiado----------------
 
 		;---------Comparaciones----------------
@@ -326,167 +284,15 @@
 			int 21h
 	main endp
 
-	moverCocodrilo PROC               ; process movement of the paddles
-		; Left paddle movement
+	EXIT_GAME PROC            		; goes back to the text mode
 
-		; check if any key is being pressed (if not check the other paddle)
-		MOV AH,01h
-		INT 16h
-		JZ finMovimiento ; ZF = 1, JZ -> Jump If Zero
+	MOV AH,00h                  ; set the configuration to video mode
+	MOV AL,02h                  ; choose the video mode
+	INT 10h                     ; execute the configuration
 
-		; check which key is being pressed (AL = ASCII character)
-		MOV AH,00h
-		INT 16h
+	jmp comienzo
 
-		cmp AL,70h
-		je volverr
-		cmp al,50h ;(P y p)
-		je volverr
-		jmp seguirr
-		volverr:
-			call EXIT_GAME
-		seguirr:
-		; if it is 'a' or 'A' move left
-		CMP AL,61h ; 'a'
-		JE moverIzquierda
-		CMP AL,41h ; 'A'
-		JE moverIzquierda
-
-		; if it is 'd' or 'D' move right
-		CMP AL,64h ; 'd'
-		JE moverDerecha
-		CMP AL,44h ; 'D'
-		JE moverDerecha
-		JMP finMovimiento
-
-	MoverIzquierda:
-		CALL limpiar
-		MOV AX,velocidad_cocodrilo
-		SUB cocodrilo_x,AX
-
-		MOV AX,bandas_pantalla
-		CMP cocodrilo_x,AX
-		JL arreglarPosicionIzq
-		JMP finMovimiento
-
-		arreglarPosicionIzq:
-			MOV cocodrilo_x,AX
-			JMP finMovimiento
-
-	moverDerecha:
-		CALL limpiar
-		MOV AX,velocidad_cocodrilo
-		ADD cocodrilo_x,AX
-
-		MOV AX,ancho_pantalla
-		SUB AX,bandas_pantalla
-		SUB AX,ancho_cocodrilo
-		CMP cocodrilo_x,AX
-		JG ArreglarPosicionDer
-		JMP finMovimiento
-
-		ArreglarPosicionDer:
-			MOV cocodrilo_x,AX
-
-		finMovimiento:
-
-		RET
-	moverCocodrilo ENDP
-
-	dibujarCocodrilo PROC
-		MOV CX,cocodrilo_x          ; set the initial column (X)
-		MOV DX,cocodrilo_y          ; set the initial line (Y)
-
-		dibujarPixel:
-		MOV AH,0Ch                    ; set the configuration to writing a pixel
-		MOV AL,0Fh                    ; choose white as color
-		MOV BH,00h                    ; set the page number
-		INT 10h                       ; execute the configuration
-
-		INC DX                        ; DX = DX + 1
-		MOV AX,DX                     ; DX - PADDLE_LEFT_Y > PADDLE_HEIGHT (Y -> we exit this procedure, N -> we continue to the next line
-		SUB AX,cocodrilo_y
-		CMP AX,altura_cocodrilo
-		JNG dibujarPixel
-
-		MOV DX,cocodrilo_y          ; the DX register goes back to the initial line
-		INC CX                        ; we advance one column
-
-		MOV AX,CX                     ; CX - PADDLE__X > PADDLE_WIDTH (Y -> We go to the next line, N -> We continue to the next column
-		SUB AX,cocodrilo_x
-		CMP AX,ancho_cocodrilo
-		JNG dibujarPixel   
-		
-		ret
-
-	dibujarCocodrilo ENDP
-
-	dibujarInterfaz PROC
-	;       Draw the points of the right player (player two)
-		
-		MOV AH,02h                       ;set cursor position
-		MOV BH,00h                       ;set page number
-		MOV DH,01h                       ;set row 
-		MOV DL,1dh						 ;set column
-		INT 10h							 
-		
-		MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
-		LEA DX,scoreTitle    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
-		INT 21h                          ;print the string
-
-		MOV AH,02h                       ;set cursor position
-		MOV BH,00h                       ;set page number
-		MOV DH,01h                       ;set row 
-		MOV DL,23h						 ;set column
-		INT 10h							 
-		
-		MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
-		LEA DX,puntos_texto    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
-		INT 21h                          ;print the string
-		
-		MOV AH,02h                       ;set cursor position
-		MOV BH,00h                       ;set page number
-		MOV DH,17h                       ;set row 
-		MOV DL,23h						 ;set column
-		INT 10h		
-		
-		MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
-		LEA DX,vidas    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
-		INT 21h                          ;print the string
-		
-		MOV AH,02h                       ;set cursor position
-		MOV BH,00h                       ;set page number
-		MOV DH,17h                       ;set row 
-		MOV DL,24h						 ;set column
-		INT 10h		
-		
-		MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
-		LEA DX,heart    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
-		INT 21h                          ;print the string
-		
-		RET
-	dibujarInterfaz ENDP
-
-	limpiar PROC                ; clear the screen by restarting the video mode
-
-		MOV AH,00h                    ; set the configuration to video mode
-		MOV AL,13h                    ; choose the video mode
-		INT 10h                       ; execute the configuration
-
-		MOV AH,0Bh                    ; set the configuration
-		MOV BH,00h                    ; to the background color
-		MOV BL,00h                    ; choose black as background color
-		INT 10h                       ; execute the configuration
-
-		RET
-	limpiar ENDP
-
-	EXIT_GAME PROC            ; goes back to the text mode
-
-		MOV AH,00h                    ; set the configuration to video mode
-		MOV AL,02h                    ; choose the video mode
-		INT 10h                       ; execute the configuration
-
-		jmp comienzo
 	EXIT_GAME ENDP
+
+
 end
