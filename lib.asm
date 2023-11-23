@@ -2,59 +2,59 @@
 .model small
 .stack 100h
 .data
-	errorCarga 			db "error en la carga",0dh,0ah,24h
+	errorCarga 		db "error en la carga",0dh,0ah,24h
 	cantidadCaracteres 	db 0
 	direccionTexto 		dw 00
-	caracteres 			db ("0123456789ABCDEF")
-	ok 		   			db 0
-	modo		  		db 0 			; 0, TEXTO
-										; 1, DEC
-										; 2, HEX
-										; 3, BIN 
+	caracteres 		db ("0123456789ABCDEF")
+	ok 		   	db 0
+	modo		  	db 0 			; 0, TEXTO
+							; 1, DEC
+							; 2, HEX
+							; 3, BIN 
 	cocodrilo_x 		DW 87h 			; current X position of the left paddle
 	cocodrilo_y 		DW 0B2h   		; current Y position of the left paddle
-	ancho_cocodrilo 	DW 20h      	; default paddle width
-	altura_cocodrilo	DW 14h      	; default paddle height
-	velocidad_cocodrilo DW 0Fh      	; default paddle velocity
+	ancho_cocodrilo 	DW 20h      		; default paddle width
+	altura_cocodrilo	DW 14h      		; default paddle height
+	velocidad_cocodrilo 	DW 0Fh      		; default paddle velocity
 
-	anchoPantalla   	DW 115h     	;320 pixels
-    largoPantalla   	DW 0C8h  		;200 pixels
-    bordes          	DW 6    		;para chequear colision
+	anchoPantalla   	DW 115h     		;320 pixels
+   	largoPantalla   	DW 0C8h  		;200 pixels
+    	bordes          	DW 6    		;para chequear colision
 
 
-	scoreTitle 			db "SCORE: ", 24h
+	scoreTitle 		db "SCORE: ", 24h
 
-	vidas 				db '5',24h
+	vidas 			db '5',24h
 
-	heart 				db "x <3",24h
+	heart 			db "x <3",24h
 
-	puntos_texto 		DB '0000','$'   ; text with the player two points
+	puntos_texto 		DB '0000','$'   	; text with the player two points
 
-	origenX 			DW 0A0h  		;posiciones de origen          DONDE SE RESETEA AL CHOCAR
-    origenY 			DW 00Ah         ;HAY QUE CAMBIARLO PARA QUE CAIGA DEL TECHO
+	origenX 		DW 0A0h  		;posiciones de origen          DONDE SE RESETEA AL CHOCAR
+    	origenY 		DW 00Ah   	        ;HAY QUE CAMBIARLO PARA QUE CAIGA DEL TECHO
 
-    tiempo_aux 			DB 0 			;variable para chequear si el tiempo cambió
+    	tiempo_aux 		DB 0 			;variable para chequear si el tiempo cambió
 	;pelota
-	posX		 	 	DW 0A0h			;columna  (centrado)
-	posY		  		DW 64h			;fila     (centrado)
+	posX		 	DW 0A0h			;columna  (centrado)
+	posY		  	DW 64h			;fila     (centrado)
 	tamanioPelota 		DW 04h			;4 pixeles de alto y ancho
 
-	speedX				DW 05h			;velocidad horizontal (innecesario para nuestro caso)
-	speedY				DW 02h			;velocidad vertical
+	speedX			DW 05h			;velocidad horizontal (innecesario para nuestro caso)
+	speedY			DW 02h			;velocidad vertical
 
 .code
 
-public carga ; Carga caracteres en RAM 
-			 ; Carga Finita DL= CANTIDAD o Infinita DL=0
-			 ; Caracter de Finalizacion DH=CARACTER
-			 ; 
-			 ; RESTRICCIONES POR TIPO DE CARGA (BIN, HEX, DEC, TEXTO)
-			 ; AH=0, TEXTO
-			 ; AH=1, DEC
-			 ; AH=2, HEX
-			 ; AH=3, BIN
-			 ;
-			 ; BX offset variable a llenar
+public carga 	; Carga caracteres en RAM 
+ 		; Carga Finita DL= CANTIDAD o Infinita DL=0
+		; Caracter de Finalizacion DH=CARACTER
+		; 
+		; RESTRICCIONES POR TIPO DE CARGA (BIN, HEX, DEC, TEXTO)
+		; AH=0, TEXTO
+		; AH=1, DEC
+		; AH=2, HEX
+		; AH=3, BIN
+		;
+		; BX offset variable a llenar
 public imprimir
 public moverCursorIzq
 public pruebaColor
@@ -70,11 +70,11 @@ public dibujoPelota
 
 dibujoPelota proc 
 	
-	mov cx, posX	;columna
+    mov cx, posX	;columna
     mov dx, posY	;fila
 
 dibujoH:	;a través de las columnas
-	mov ah, 0Ch	;configuración para dibujar un pixel
+    mov ah, 0Ch	;configuración para dibujar un pixel
     mov al, 0Fh	;color blanco
     mov bh, 00h
     int 10h 		;ejecuto
