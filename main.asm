@@ -79,8 +79,6 @@
 				db "",0dh,0ah
 				db "",0dh,0ah
 				db "!INGRESE CUALQUIER NUMERO PARA VOLVER AL MENU! ",0dh,0ah,24h
-
-		error 		db "INGRESE UNA OPCION VALIDA.",0dh,0ah,24h
 		
 		opcion		db "x"
 ;Codigo
@@ -185,7 +183,6 @@
 			
 			cmp opcion, '4'
 			je atajo
-			;si no se ingresa una opcion válida...
 
 			;---------prueba color-------
 				mov bh, 10
@@ -198,10 +195,6 @@
 				push dx
 				call pruebaColor
 			;---------fin prueba---------
-			mov bx, offset error
-			push bx 
-			call imprimir
-			jmp cargas
 		;---------fin comparaciones----------------
 		atajo:
 		jmp finprograma
