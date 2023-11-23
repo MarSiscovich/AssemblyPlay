@@ -80,7 +80,7 @@
 				db "!INGRESE CUALQUIER NUMERO PARA VOLVER AL MENU! ",0dh,0ah,24h
 	;fingraficos
 		opcion		db "x"
-		tiempo_aux DB 0
+		tiempo_aux  DB 0
 ;Codigo
 .code
 
@@ -96,7 +96,9 @@
 	extrn muevoPelota:proc
 	extrn posicionInicial:proc
 	extrn dibujoPelota:proc
+	extrn MENUPAUSE:proc
 	public EXIT_GAME
+	public resume
 
 
 	main proc
@@ -286,12 +288,16 @@
 
 	EXIT_GAME PROC            		; goes back to the text mode
 
-	MOV AH,00h                  ; set the configuration to video mode
-	MOV AL,02h                  ; choose the video mode
-	INT 10h                     ; execute the configuration
+		MOV AH,00h                  ; set the configuration to video mode
+		MOV AL,02h                  ; choose the video mode
+		INT 10h                     ; execute the configuration
 
-	jmp comienzo
+		jmp comienzo
 
 	EXIT_GAME ENDP
+	
+	RESUME PROC
+		jmp jugar
+	RESUME endp
 
 end
