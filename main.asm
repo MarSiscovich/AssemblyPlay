@@ -3,7 +3,8 @@
 .stack 100h
 .data
 	;Datos del menu y resto
-		tiempo_aux DB 0   
+	;Graficos
+		   
 		titulo		db "",0dh,0ah
 				db "",0dh,0ah
 				db "	  ______                             ____        __          ",0dh,0ah
@@ -30,7 +31,7 @@
 				db "",0dh,0ah
 				db "",0dh,0ah,24h
 
-	instruct		db "",0dh,0ah
+		instruct		db "",0dh,0ah
 				db "   ___               _                            _                          ",0dh,0ah
 				db "  |_ _|  _ _    ___ | |_   _ _   _  _   __   __  (_)  ___   _ _    ___   ___ ",0dh,0ah
 				db "   | |  | ' \  (_-< |  _| | '_| | || | / _| / _| | | / _ \ | ' \  / -_) (_-< ",0dh,0ah
@@ -77,8 +78,9 @@
 				db "",0dh,0ah
 				db "",0dh,0ah
 				db "!INGRESE CUALQUIER NUMERO PARA VOLVER AL MENU! ",0dh,0ah,24h
-		
+	;fingraficos
 		opcion		db "x"
+		tiempo_aux DB 0
 ;Codigo
 .code
 
@@ -195,8 +197,10 @@
 				call pruebaColor
 			;---------fin prueba---------
 		;---------fin comparaciones----------------
+		
 		atajo:
 		jmp finprograma
+		;===============JUEGO================
 		jugar:
 		CALL limpiar			; set initial video mode configurations
 		jmp chequeoTiempo  
@@ -222,6 +226,8 @@
 		    jmp chequeoTiempo 
 
 		call EXIT_GAME
+
+		;===============Instrucciones/controles================
 		instrucciones:
 			;---------prueba color-------
 				mov bh, 10
@@ -247,6 +253,7 @@
 				call carga
 				jmp comienzo
 
+		;===============CREDITOS================
 		creditoss:
 			;---------prueba color-------
 				mov bh, 10
