@@ -11,40 +11,45 @@
 							; 1, DEC
 							; 2, HEX
 							; 3, BIN 
-	cocodrilo_x 		DW 87h 			; current X position of the left paddle
-	cocodrilo_y 		DW 0B2h   		; current Y position of the left paddle
-	ancho_cocodrilo 	DW 20h      		; default paddle width
-	altura_cocodrilo	DW 14h      		; default paddle height
-	velocidad_cocodrilo 	DW 0Fh      		; default paddle velocity
+	;Datos del Juego
+		ancho_pantalla DW 115h             ; the width of the window (320 pixels)
+		altura_pantalla DW 0C8h            ; the height of the window (200 pixels)
+		bandas_pantalla DW 6               ; variable used to check collisions early
+		
+		origenX DW 0A0h  ;posiciones de origen          DONDE SE RESETEA AL CHOCAR
+		origenY DW 00Ah                                 ;HAY QUE CAMBIARLO PARA QUE CAIGA DEL TECHO
 
-	anchoPantalla   	DW 115h     		;320 pixels
-   	largoPantalla   	DW 0C8h  		;200 pixels
-    	bordes          	DW 6    		;para chequear colision
+		;pelota santi
+		posX		  DW 0A0h	;columna  (centrado)
+		posY		  DW 64h	;fila     (centrado)
+		tamanioPelota DW 04h	;4 pixeles de alto y ancho
 
+		speedX	DW 05h	;velocidad horizontal (innecesario para nuestro caso)
+		speedY	DW 02h	;velocidad vertical
 
-	scoreTitle 		db "SCORE: ", 24h
+		volver_menu DB "0"
 
-	vidas 			db '5',24h
+		tiempo_aux DB 0   
 
-	heart 			db "x <3",24h
+		puntos_texto DB '0000','$'         ; text with the player two points
 
-	puntos_texto 		DB '0000','$'   	; text with the player two points
+		scoreTitle db "SCORE: ", 24h
 
-	origenX 		DW 0A0h  		;posiciones de origen          DONDE SE RESETEA AL CHOCAR
-    	origenY 		DW 00Ah   	        ;HAY QUE CAMBIARLO PARA QUE CAIGA DEL TECHO
+		vidas db '5',24h
 
-    	tiempo_aux 		DB 0 			;variable para chequear si el tiempo cambió
-	;pelota
-	posX		 	DW 0A0h			;columna  (centrado)
-	posY		  	DW 64h			;fila     (centrado)
-	tamanioPelota 		DW 04h			;4 pixeles de alto y ancho
+		heart db "x <3",24h
 
-	speedX			DW 05h			;velocidad horizontal (innecesario para nuestro caso)
-	speedY			DW 02h			;velocidad vertical
+		cocodrilo_x DW 87h                  ; current X position of the left paddle
+		cocodrilo_y DW 0B2h                 ; current Y position of the left paddle
+
+		ancho_cocodrilo DW 20h              ; default paddle width
+		altura_cocodrilo DW 14h             ; default paddle height
+		velocidad_cocodrilo DW 14h          ; default paddle velocity
+	;Datos del menu y resto
 
 .code
 
-public carga 	; Carga caracteres en RAM 
+	public carga 	; Carga caracteres en RAM 
  		; Carga Finita DL= CANTIDAD o Infinita DL=0
 		; Caracter de Finalizacion DH=CARACTER
 		; 
@@ -55,187 +60,352 @@ public carga 	; Carga caracteres en RAM
 		; AH=3, BIN
 		;
 		; BX offset variable a llenar
-public imprimir
-public moverCursorIzq
-public pruebaColor
-public limpiarPantalla
-public moverCocodrilo
-public limpiar 
-public dibujarInterfaz
-public dibujarCocodrilo
-extrn EXIT_GAME:proc
-public muevoPelota
-public posicionInicial
-public dibujoPelota
-
-dibujoPelota proc 
+	public imprimir
+	public moverCursorIzq
+	public pruebaColor
+	public limpiarPantalla
+	public moverCocodrilo
+	public limpiar 
+	public dibujarInterfaz
+	public dibujarCocodrilo
+	public muevoPelota
+	public posicionInicial
+	public dibujoPelota
+	extrn EXIT_GAME:proc
 	
-    mov cx, posX	;columna
-    mov dx, posY	;fila
-
-dibujoH:	;a través de las columnas
-    mov ah, 0Ch	;configuración para dibujar un pixel
-    mov al, 0Fh	;color blanco
-    mov bh, 00h
-    int 10h 		;ejecuto
-
-    inc cx
-    mov ax, cx
-    sub ax, posX
-    cmp ax, tamanioPelota
-    jng dibujoH
-
-    mov cx,posX		;columna inicial
-    inc dx			;avanza línea
-
-    mov ax, dx
-	sub ax, posY
-	cmp ax, tamanioPelota
-	jng dibujoH
-
-    ret
-dibujoPelota endp
-
-
-posicionInicial proc
-    mov ax, origenX
-    mov posX, ax
-
-    mov ax, origenY
-    mov posY, ax
-
-
-    ret
-posicionInicial endp
-
-muevoPelota proc
-;---SI LLEGA A LOS BORDES LATERALES, SE CAMBIA LA DIRECCION X
-    mov ax, speedX
-    add posX, ax        ;velocidad X
-
-    mov ax, bordes
-    cmp posX, ax        ;posX < 0 
-    jl negSpeedX
-
-    mov ax, anchoPantalla
-    sub ax, tamanioPelota   ;posX > bordes- tamanioPelota
-    sub ax, bordes
-    cmp posX, ax
-    jg negSpeedX
-;--
-    mov ax, speedY
-    add posY, ax        ;velocidad Y
-
-;    mov ax, bordes
-;    cmp posY, ax        ;resetamos acá?
-;    jl negSpeedY
-
-    mov ax, largoPantalla
-    sub ax, tamanioPelota   ;o acá? <--- ACÁ SANTI ACÁ
-    sub ax, bordes
-    cmp posY, ax
-    jg resetPos
-
-    ret
- 
-    resetPos:
-    call posicionInicial
-    ret
-    
-    negSpeedX:
-    neg speedX
-    ret
-muevoPelota endp
-
-dibujarCocodrilo PROC
-	MOV CX,cocodrilo_x          ; set the initial column (X)
-	MOV DX,cocodrilo_y          ; set the initial line (Y)
-
-	dibujarPixel:
-	MOV AH,0Ch                    ; set the configuration to writing a pixel
-	MOV AL,0Fh                    ; choose white as color
-	MOV BH,00h                    ; set the page number
-	INT 10h                       ; execute the configuration
-
-	INC DX                        ; DX = DX + 1
-	MOV AX,DX                     ; DX - PADDLE_LEFT_Y > PADDLE_HEIGHT (Y -> we exit this procedure, N -> we continue to the next line
-	SUB AX,cocodrilo_y
-	CMP AX,altura_cocodrilo
-	JNG dibujarPixel
-
-	MOV DX,cocodrilo_y          ; the DX register goes back to the initial line
-	INC CX                        ; we advance one column
-
-	MOV AX,CX                     ; CX - PADDLE__X > PADDLE_WIDTH (Y -> We go to the next line, N -> We continue to the next column
-	SUB AX,cocodrilo_x
-	CMP AX,ancho_cocodrilo
-	JNG dibujarPixel   
+	;--------------------------------------------------------------------------
 	
-	ret
+	carga proc
+			push cx
+			push bx
 
-dibujarCocodrilo ENDP
+			mov cantidadCaracteres, dl
+			mov direccionTexto, bx
+			mov modo, ah
 
-dibujarInterfaz PROC
-	;       Draw the points of the right player (player two)
-		
-		MOV AH,02h                       ;set cursor position
-		MOV BH,00h                       ;set page number
-		MOV DH,01h                       ;set row 
-		MOV DL,1dh						 ;set column
-		INT 10h							 
-		
-		MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
-		LEA DX,scoreTitle    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
-		INT 21h                          ;print the string
+		comienzaCarga:
+			xor cx, cx
+			cmp dl,0
+			je infinita
+			mov cl, cantidadCaracteres
 
-		MOV AH,02h                       ;set cursor position
-		MOV BH,00h                       ;set page number
-		MOV DH,01h                       ;set row 
-		MOV DL,23h						 ;set column
-		INT 10h							 
-		
-		MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
-		LEA DX,puntos_texto    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
-		INT 21h                          ;print the string
-		
-		MOV AH,02h                       ;set cursor position
-		MOV BH,00h                       ;set page number
-		MOV DH,17h                       ;set row 
-		MOV DL,23h						 ;set column
-		INT 10h		
-		
-		MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
-		LEA DX,vidas    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
-		INT 21h                          ;print the string
-		
-		MOV AH,02h                       ;set cursor position
-		MOV BH,00h                       ;set page number
-		MOV DH,17h                       ;set row 
-		MOV DL,24h						 ;set column
-		INT 10h		
-		
-		MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
-		LEA DX,heart    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
-		INT 21h                          ;print the string
-		
-		RET
-dibujarInterfaz ENDP
+		finita:
+			mov ah, 1
+			int 21h
+			call checkCaracter
+			cmp al, 3
+			je limpia
+			mov byte ptr[bx],al 
+			inc bx
+			loop finita
+			jmp finCarga
 
-limpiar PROC                ; clear the screen by restarting the video mode
+		infinita:
+			mov ah, 1
+			int 21h
+			cmp al, dh	
+			je finInfinita
+			call checkCaracter
+			cmp al, 3
+			je limpia
+			mov byte ptr[bx],al 
+			inc bx
+			jmp infinita
 
-	MOV AH,00h                    ; set the configuration to video mode
-	MOV AL,13h                    ; choose the video mode
-	INT 10h                       ; execute the configuration
+		finInfinita:
+			jmp finCarga
 
-	MOV AH,0Bh                    ; set the configuration
-	MOV BH,00h                    ; to the background color
-	MOV BL,00h                    ; choose black as background color
-	INT 10h                       ; execute the configuration
+		limpia:
 
-	RET
-limpiar ENDP
+			push dx
+			push ax
+			mov ah, 9
+			mov dx, offset errorCarga
+			int 21h
+			pop ax 
+			pop dx
+			mov bx, direccionTexto
 
-moverCocodrilo PROC               ; process movement of the paddles
+		procLimpieza:
+			cmp byte ptr[bx], 24h
+			je finLimpia
+			mov byte ptr[bx], 24h
+			inc bx
+			jmp procLimpieza
+
+		finLimpia:
+			mov bx, direccionTexto
+			jmp comienzaCarga
+
+		finCarga:
+			pop bx
+			pop cx
+			ret
+
+	carga endp
+
+	;--------------------------------------------------------------------------
+
+	checkCaracter proc ;RECIBE EN AL UN CARACTER y DEPENDIENDO DEL VALOR DE LA VARIBLE
+						;MODO CHEQUEA SI ES CORRECTO EL MISMO 
+			push cx 
+			push si
+
+			mov ok, 0
+
+			cmp modo, 0 
+			je finCheckCaracter
+			cmp modo, 1 
+			je esDec
+			cmp modo, 2 
+			je esHex
+			cmp modo, 3 
+			je esBin
+		esDec:
+			mov si, 0
+			mov cx, 10
+		checkDec:	
+			cmp al, caracteres[si]
+			je encontre
+			inc si
+		loop checkDec
+			mov al, 3
+			jmp finCheckCaracter
+
+		esHex:
+			mov si, 0
+			mov cx, 16
+		checkHex:	
+			cmp al, caracteres[si]
+			je encontre
+			inc si
+			loop checkHex
+			mov al, 3
+			jmp finCheckCaracter
+		esBin:
+			mov si, 0
+			mov cx, 2
+		checkBin:	
+			cmp al, caracteres[si]
+			je encontre
+			inc si
+		loop checkBin
+			mov al, 3
+			jmp finCheckCaracter
+
+		encontre:
+			mov ok, 1
+			jmp finCheckCaracter
+
+	finCheckCaracter:
+		pop si
+		pop cx
+
+		ret
+		checkCaracter endp
+
+	imprimir proc
+		push bp
+		mov bp, sp
+		push dx
+		push ax
+		mov dx, ss:[bp+4]
+
+		mov ah,9
+		int 21h
+
+		pop ax
+		pop dx
+		pop bp
+		ret 2
+
+	imprimir endp
+
+	;--------------------------------------------------------------------------
+
+	moverCursorIzq proc 	; Mueve el cursor a la esquina superior izquierda
+		push bp 
+		mov bp, sp
+		push si
+		push di
+		push ax
+		mov si, ss:[bp+6]
+		mov di, ss:[bp+4]
+
+		mov ah, 2     		; Función 02h - Posiciona el cursor
+		int 10h       		; Llama a la interrupción 10h para posicionar el cursor
+
+		pop ax
+		pop di
+		pop si
+		pop bp 
+		ret 6
+	moverCursorIzq endp
+
+	;--------------------------------------------------------------------------
+
+	pruebaColor proc 
+		push bp 
+		mov bp, sp
+		push bx
+		push si
+		push di
+		push ax
+		mov bx, ss:[bp+8]
+		mov si, ss:[bp+6]
+		mov di, ss:[bp+4]
+		
+		mov ax, 0600h
+		int 10h
+
+		pop ax
+		pop di
+		pop si
+		pop bx
+		pop bp 
+		ret 8
+	pruebaColor endp
+
+	;--------------------------------------------------------------------------
+
+  	dibujoPelota proc 
+		
+		mov cx, posX	;columna
+		mov dx, posY	;fila
+
+		dibujoH:	;a través de las columnas
+			mov ah, 0Ch	;configuración para dibujar un pixel
+			mov al, 0Fh	;color blanco
+			mov bh, 00h
+			int 10h 		;ejecuto
+
+			inc cx
+			mov ax, cx
+			sub ax, posX
+			cmp ax, tamanioPelota
+		jng dibujoH
+
+		mov cx,posX		;columna inicial
+		inc dx			;avanza línea
+
+		mov ax, dx
+		sub ax, posY
+		cmp ax, tamanioPelota
+		jng dibujoH
+
+		ret
+	dibujoPelota endp
+
+	;--------------------------------------------------------------------------
+
+	posicionInicial proc
+		mov ax, origenX
+		mov posX, ax
+
+		mov ax, origenY
+		mov posY, ax
+
+
+		ret
+	posicionInicial endp
+
+	;--------------------------------------------------------------------------
+
+	muevoPelota proc
+	;---SI LLEGA A LOS BORDES LATERALES, SE CAMBIA LA DIRECCION X
+		mov ax, speedX
+		add posX, ax        ;velocidad X
+
+		mov ax, bandas_pantalla
+		cmp posX, ax        ;posX < 0 + bordes
+		jl negSpeedX
+
+		mov ax, ancho_pantalla
+		sub ax, tamanioPelota   ;posX > bordes- tamanioPelota
+		sub ax, bandas_pantalla
+		cmp posX, ax
+		jg negSpeedX
+
+		mov ax, speedY
+		add posY, ax        ;velocidad Y
+
+		;chequeo si la pelota pasó el borde inferior
+
+		mov ax, altura_pantalla
+		sub ax, tamanioPelota   ;RESETEO POSICION SI TOCA
+		sub ax, bandas_pantalla          ;EL BORDE INFERIOR
+		cmp posY, ax
+		jg resetPos
+
+		chequeoColision:        ;colisión con paddle
+		mov ax, posX
+		add ax, tamanioPelota
+		cmp ax, cocodrilo_x
+		jng noColision
+
+		mov ax, cocodrilo_x
+		add ax, ancho_cocodrilo
+		cmp posX, ax
+		jnl noColision
+
+		mov ax, posY
+		add ax, tamanioPelota
+		cmp ax, cocodrilo_y
+		jng noColision
+
+		mov ax, cocodrilo_y
+		add ax, altura_cocodrilo
+		cmp posY, ax
+		jnl noColision
+
+		;si llegó acá, hubo colisión
+		jmp resetPos
+		
+		noColision:
+		ret
+
+		resetPos:
+		call posicionInicial
+		ret
+		
+		negSpeedX:
+		neg speedX
+		ret
+	muevoPelota endp
+
+	;--------------------------------------------------------------------------
+
+	dibujarCocodrilo PROC
+		MOV CX,cocodrilo_x          ; set the initial column (X)
+		MOV DX,cocodrilo_y          ; set the initial line (Y)
+
+		dibujarPixel:
+		MOV AH,0Ch                    ; set the configuration to writing a pixel
+		MOV AL,0Fh                    ; choose white as color
+		MOV BH,00h                    ; set the page number
+		INT 10h                       ; execute the configuration
+
+		INC DX                        ; DX = DX + 1
+		MOV AX,DX                     ; DX - PADDLE_LEFT_Y > PADDLE_HEIGHT (Y -> we exit this procedure, N -> we continue to the next line
+		SUB AX,cocodrilo_y
+		CMP AX,altura_cocodrilo
+		JNG dibujarPixel
+
+		MOV DX,cocodrilo_y          ; the DX register goes back to the initial line
+		INC CX                        ; we advance one column
+
+		MOV AX,CX                     ; CX - PADDLE__X > PADDLE_WIDTH (Y -> We go to the next line, N -> We continue to the next column
+		SUB AX,cocodrilo_x
+		CMP AX,ancho_cocodrilo
+		JNG dibujarPixel   
+		
+		ret
+
+	dibujarCocodrilo ENDP
+
+	;--------------------------------------------------------------------------
+
+	moverCocodrilo PROC               ; process movement of the paddles
 		; Left paddle movement
 
 		; check if any key is being pressed (if not check the other paddle)
@@ -269,11 +439,10 @@ moverCocodrilo PROC               ; process movement of the paddles
 		JMP finMovimiento
 
 	MoverIzquierda:
-		CALL limpiar
 		MOV AX,velocidad_cocodrilo
 		SUB cocodrilo_x,AX
 
-		MOV AX,bordes
+		MOV AX,bandas_pantalla
 		CMP cocodrilo_x,AX
 		JL arreglarPosicionIzq
 		JMP finMovimiento
@@ -283,12 +452,11 @@ moverCocodrilo PROC               ; process movement of the paddles
 			JMP finMovimiento
 
 	moverDerecha:
-		CALL limpiar
 		MOV AX,velocidad_cocodrilo
 		ADD cocodrilo_x,AX
 
-		MOV AX,anchoPantalla
-		SUB AX,bordes
+		MOV AX,ancho_pantalla
+		SUB AX,bandas_pantalla
 		SUB AX,ancho_cocodrilo
 		CMP cocodrilo_x,AX
 		JG ArreglarPosicionDer
@@ -301,203 +469,84 @@ moverCocodrilo PROC               ; process movement of the paddles
 
 		RET
 	moverCocodrilo ENDP
-
-limpiarPantalla proc
 	
-	mov ah, 0fh
-	int 10h
+	;--------------------------------------------------------------------------
 
-	mov ah, 0
-	int 10h
+	dibujarInterfaz PROC
+		;       Draw the points of the right player (player two)
+			
+			MOV AH,02h                       ;set cursor position
+			MOV BH,00h                       ;set page number
+			MOV DH,01h                       ;set row 
+			MOV DL,1dh						 ;set column
+			INT 10h							 
+			
+			MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
+			LEA DX,scoreTitle    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
+			INT 21h                          ;print the string
 
-	ret
+			MOV AH,02h                       ;set cursor position
+			MOV BH,00h                       ;set page number
+			MOV DH,01h                       ;set row 
+			MOV DL,23h						 ;set column
+			INT 10h							 
+			
+			MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
+			LEA DX,puntos_texto    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
+			INT 21h                          ;print the string
+			
+			MOV AH,02h                       ;set cursor position
+			MOV BH,00h                       ;set page number
+			MOV DH,17h                       ;set row 
+			MOV DL,23h						 ;set column
+			INT 10h		
+			
+			MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
+			LEA DX,vidas    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
+			INT 21h                          ;print the string
+			
+			MOV AH,02h                       ;set cursor position
+			MOV BH,00h                       ;set page number
+			MOV DH,17h                       ;set row 
+			MOV DL,24h						 ;set column
+			INT 10h		
+			
+			MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
+			LEA DX,heart    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
+			INT 21h                          ;print the string
+			
+			RET
+	dibujarInterfaz ENDP
 
-limpiarPantalla endp
+	;--------------------------------------------------------------------------
 
-carga proc
-		push cx
-		push bx
+	limpiar PROC                ; clear the screen by restarting the video mode
 
-		mov cantidadCaracteres, dl
-		mov direccionTexto, bx
-		mov modo, ah
+		MOV AH,00h                    ; set the configuration to video mode
+		MOV AL,13h                    ; choose the video mode
+		INT 10h                       ; execute the configuration
 
-	comienzaCarga:
-		xor cx, cx
-		cmp dl,0
-		je infinita
-		mov cl, cantidadCaracteres
+		MOV AH,0Bh                    ; set the configuration
+		MOV BH,00h                    ; to the background color
+		MOV BL,00h                    ; choose black as background color
+		INT 10h                       ; execute the configuration
 
-	finita:
-		mov ah, 1
-		int 21h
-		call checkCaracter
-		cmp al, 3
-		je limpia
-		mov byte ptr[bx],al 
-		inc bx
-		loop finita
-		jmp finCarga
+		RET
+	limpiar ENDP
 
-	infinita:
-		mov ah, 1
-		int 21h
-		cmp al, dh	
-		je finInfinita
-		call checkCaracter
-		cmp al, 3
-		je limpia
-		mov byte ptr[bx],al 
-		inc bx
-		jmp infinita
+	;--------------------------------------------------------------------------
 
-	finInfinita:
-		jmp finCarga
+	limpiarPantalla proc
+		
+		mov ah, 0fh
+		int 10h
 
-	limpia:
+		mov ah, 0
+		int 10h
 
-		push dx
-		push ax
-		mov ah, 9
-		mov dx, offset errorCarga
-		int 21h
-		pop ax 
-		pop dx
-		mov bx, direccionTexto
-
-	procLimpieza:
-		cmp byte ptr[bx], 24h
-		je finLimpia
-		mov byte ptr[bx], 24h
-		inc bx
-		jmp procLimpieza
-
-	finLimpia:
-		mov bx, direccionTexto
-		jmp comienzaCarga
-
-	finCarga:
-		pop bx
-		pop cx
 		ret
 
-carga endp
+	limpiarPantalla endp
 
-checkCaracter proc ;RECIBE EN AL UN CARACTER y DEPENDIENDO DEL VALOR DE LA VARIBLE
-					   ;MODO CHEQUEA SI ES CORRECTO EL MISMO 
-		push cx 
-		push si
-
-		mov ok, 0
-
-		cmp modo, 0 
-		je finCheckCaracter
-		cmp modo, 1 
-		je esDec
-		cmp modo, 2 
-		je esHex
-		cmp modo, 3 
-		je esBin
-	esDec:
-		mov si, 0
-		mov cx, 10
-	checkDec:	
-		cmp al, caracteres[si]
-		je encontre
-		inc si
-	loop checkDec
-		mov al, 3
-		jmp finCheckCaracter
-
-	esHex:
-		mov si, 0
-		mov cx, 16
-	checkHex:	
-		cmp al, caracteres[si]
-		je encontre
-		inc si
-		loop checkHex
-		mov al, 3
-		jmp finCheckCaracter
-	esBin:
-		mov si, 0
-		mov cx, 2
-	checkBin:	
-		cmp al, caracteres[si]
-		je encontre
-		inc si
-	loop checkBin
-		mov al, 3
-		jmp finCheckCaracter
-
-	encontre:
-		mov ok, 1
-		jmp finCheckCaracter
-
-finCheckCaracter:
-	pop si
-	pop cx
-
-	ret
-	checkCaracter endp
-
-imprimir proc
-	push bp
-	mov bp, sp
-	push dx
-	push ax
-	mov dx, ss:[bp+4]
-
-	mov ah,9
-	int 21h
-
-	pop ax
-	pop dx
-	pop bp
-	ret 2
-
-imprimir endp
-
-moverCursorIzq proc 	; Mueve el cursor a la esquina superior izquierda
-	push bp 
-	mov bp, sp
-	push si
-	push di
-	push ax
-	mov si, ss:[bp+6]
-	mov di, ss:[bp+4]
-
-    mov ah, 2     		; Función 02h - Posiciona el cursor
-    int 10h       		; Llama a la interrupción 10h para posicionar el cursor
-
-    pop ax
-    pop di
-    pop si
-    pop bp 
-    ret 6
-moverCursorIzq endp
-
-
-pruebaColor proc 
-	push bp 
-	mov bp, sp
-	push bx
-	push si
-	push di
-	push ax
-	mov bx, ss:[bp+8]
-	mov si, ss:[bp+6]
-	mov di, ss:[bp+4]
-	
-	mov ax, 0600h
-	int 10h
-
-    pop ax
-    pop di
-    pop si
-    pop bx
-    pop bp 
-    ret 8
-pruebaColor endp
-
+	;--------------------------------------------------------------------------
 end
