@@ -26,26 +26,20 @@
 
 		speedX	DW 05h	;velocidad horizontal (innecesario para nuestro caso)
 		speedY	DW 02h	;velocidad vertical
-
-		volver_menu DB "0"
-
-		tiempo_aux DB 0   
-
-		puntos_texto DB '0000','$'         ; text with the player two points
-
-		scoreTitle db "SCORE: ", 24h
-
-		vidas db ' x5',24h
-
-		heart db 03h, 24h
-
+		
 		cocodrilo_x DW 87h                  ; current X position of the left paddle
 		cocodrilo_y DW 0B2h                 ; current Y position of the left paddle
 
 		ancho_cocodrilo DW 20h              ; default paddle width
 		altura_cocodrilo DW 14h             ; default paddle height
 		velocidad_cocodrilo DW 16h          ; default paddle velocity
-	;Datos del menu y resto
+
+		volver_menu DB "0"
+		tiempo_aux DB 0   
+		puntos_texto DB '0000','$'         ; text with the player two points
+		scoreTitle db "SCORE: ", 24h
+		vidas db ' x5',24h
+		heart db 03h, 24h
 
 .code
 
@@ -60,6 +54,7 @@
 		; AH=3, BIN
 		;
 		; BX offset variable a llenar
+	public random		; PROCESO ALEATORIO - Devuelve en AL un número del 0 al 9 usando los milisegundos del la función TIME$
 	public imprimir
 	public moverCursorIzq
 	public pruebaColor
@@ -73,7 +68,7 @@
 	public dibujoPelota
 	extrn EXIT_GAME:proc
 	
-	;--------------------------------------------------------------------------
+	;==========================================================================
 	
 	carga proc
 			push cx
@@ -144,7 +139,7 @@
 
 	carga endp
 
-	;--------------------------------------------------------------------------
+	;==========================================================================
 
 	checkCaracter proc ;RECIBE EN AL UN CARACTER y DEPENDIENDO DEL VALOR DE LA VARIBLE
 						;MODO CHEQUEA SI ES CORRECTO EL MISMO 
@@ -197,12 +192,14 @@
 			mov ok, 1
 			jmp finCheckCaracter
 
-	finCheckCaracter:
-		pop si
-		pop cx
+		finCheckCaracter:
+			pop si
+			pop cx
 
-		ret
-		checkCaracter endp
+			ret
+	checkCaracter endp
+	
+	;==========================================================================
 
 	imprimir proc
 		push bp
@@ -220,8 +217,27 @@
 		ret 2
 
 	imprimir endp
+	
+	;==========================================================================
+	
+	random proc 		; PROCESO ALEATORIO - Devuelve en AL un número del 0 al 9 usando los milisegundos del la función TIME$	
+		push cx
+		push dx
 
-	;--------------------------------------------------------------------------
+		mov ah, 2ch
+		int 21h
+		xor ax, ax
+		mov al, dl
+		mov cl, 0ah
+		div cl
+		xor ah, ah
+
+		pop dx
+		pop cx
+		ret
+	random endp
+
+	;==========================================================================
 
 	moverCursorIzq proc 	; Mueve el cursor a la esquina superior izquierda
 		push bp 
@@ -242,7 +258,7 @@
 		ret 6
 	moverCursorIzq endp
 
-	;--------------------------------------------------------------------------
+	;==========================================================================
 
 	pruebaColor proc 
 		push bp 
@@ -266,7 +282,7 @@
 		ret 8
 	pruebaColor endp
 
-	;--------------------------------------------------------------------------
+	;==========================================================================
 
   	dibujoPelota proc 
 		
@@ -296,7 +312,7 @@
 		ret
 	dibujoPelota endp
 
-	;--------------------------------------------------------------------------
+	;==========================================================================
 
 	posicionInicial proc
 		mov ax, origenX
@@ -309,7 +325,7 @@
 		ret
 	posicionInicial endp
 
-	;--------------------------------------------------------------------------
+	;==========================================================================
 
 	muevoPelota proc
 	;---SI LLEGA A LOS BORDES LATERALES, SE CAMBIA LA DIRECCION X
@@ -373,7 +389,7 @@
 		ret
 	muevoPelota endp
 
-	;--------------------------------------------------------------------------
+	;==========================================================================
 
 	dibujarCocodrilo PROC
 		MOV CX,cocodrilo_x          ; set the initial column (X)
@@ -403,7 +419,7 @@
 
 	dibujarCocodrilo ENDP
 
-	;--------------------------------------------------------------------------
+	;==========================================================================
 
 	moverCocodrilo PROC               ; process movement of the paddles
 		; Left paddle movement
@@ -470,7 +486,7 @@
 		RET
 	moverCocodrilo ENDP
 	
-	;--------------------------------------------------------------------------
+	;==========================================================================
 
 	dibujarInterfaz PROC
 		;       Draw the points of the right player (player two)
@@ -518,7 +534,7 @@
 			RET
 	dibujarInterfaz ENDP
 
-	;--------------------------------------------------------------------------
+	;==========================================================================
 
 	limpiar PROC                ; clear the screen by restarting the video mode
 
@@ -534,7 +550,7 @@
 		RET
 	limpiar ENDP
 
-	;--------------------------------------------------------------------------
+	;==========================================================================
 
 	limpiarPantalla proc
 		
@@ -548,5 +564,5 @@
 
 	limpiarPantalla endp
 
-	;--------------------------------------------------------------------------
+	;==========================================================================
 end
