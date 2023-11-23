@@ -3,7 +3,40 @@
 .stack 100h
 .data
 	;Datos del Juego
-		tiempo_aux 	DB 0   
+		ancho_pantalla DW 115h             ; the width of the window (320 pixels)
+		altura_pantalla DW 0C8h            ; the height of the window (200 pixels)
+		bandas_pantalla DW 6               ; variable used to check collisions early
+		
+		origenX DW 0A0h  ;posiciones de origen          DONDE SE RESETEA AL CHOCAR
+		origenY DW 00Ah                                 ;HAY QUE CAMBIARLO PARA QUE CAIGA DEL TECHO
+
+		;pelota santi
+		posX		  DW 0A0h	;columna  (centrado)
+		posY		  DW 64h	;fila     (centrado)
+		tamanioPelota DW 04h	;4 pixeles de alto y ancho
+
+		speedX	DW 05h	;velocidad horizontal (innecesario para nuestro caso)
+		speedY	DW 02h	;velocidad vertical
+
+		volver_menu DB "0"
+
+		tiempo_aux DB 0   
+
+		puntos_texto DB '0000','$'         ; text with the player two points
+
+		scoreTitle db "SCORE: ", 24h
+
+		vidas db '5',24h
+
+		heart db "x <3",24h
+
+		cocodrilo_x DW 87h                  ; current X position of the left paddle
+		cocodrilo_y DW 0B2h                 ; current Y position of the left paddle
+
+		ancho_cocodrilo DW 20h              ; default paddle width
+		altura_cocodrilo DW 14h             ; default paddle height
+		velocidad_cocodrilo DW 14h          ; default paddle velocity
+	;Datos del menu y resto   
 
 	;Datos del menu y resto
 		titulo		db "",0dh,0ah
@@ -93,10 +126,11 @@
 	extrn limpiar:proc
 	extrn dibujarInterfaz:proc
 	extrn dibujarCocodrilo:proc
-	public EXIT_GAME
 	extrn muevoPelota:proc
 	extrn posicionInicial:proc
 	extrn dibujoPelota:proc
+	public EXIT_GAME
+
 
 	main proc
 		mov ax, @data 
