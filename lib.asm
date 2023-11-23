@@ -599,7 +599,7 @@ resetear PROC
     ; Inicializar puntos_texto con '0000'
     MOV SI, OFFSET puntos_texto
     MOV CX, 4
-    MOV AL, '5'
+    MOV AL, '0'
     REPEAT_POINTS:
         MOV [SI], AL
         INC SI
