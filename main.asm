@@ -15,7 +15,7 @@
 
 		scoreTitle db "SCORE: ", 24h
 
-		vidas db '0',24h
+		vidas db '5',24h
 
 		heart db "x <3",24h
 
@@ -33,7 +33,8 @@
 					db "	  / / / ___/ __ `/ __ `/ __ `/_____/ __  / __ \/ / __ `/ ___/",0dh,0ah
 					db "	 / / / /  / /_/ / /_/ / /_/ /_____/ /_/ / /_/ / / /_/ (__  ) ",0dh,0ah
 					db "	/_/ /_/   \__,_/\__, /\__,_/     /_____/\____/_/\__,_/____/  ",0dh,0ah
-					db "	               /____/                                        ",0dh,0ah,0dh,0ah,24h
+					db "	               /____/                                        ",0dh,0ah
+					db "",0dh,0ah,24h
 					
 		subt		db "              COCODRILO QUE DUERME ES CARTERA",0dh,0ah,0dh,0ah,24h
 
@@ -134,7 +135,6 @@
 .code
 
 	extrn carga:proc
-	extrn 
 	extrn imprimir:proc
 	extrn moverCursorIzq:proc
 	extrn llenaBlanco:proc
@@ -254,8 +254,7 @@
 		jugar:
 		CALL limpiar			; set initial video mode configurations
 		jmp CHECK_TIME  
-		atajo2:
-		jmp comienzo
+
 		CHECK_TIME:
 		;se ve si sigue activo el juego
 		ok:
@@ -266,15 +265,12 @@
 			JE CHECK_TIME              ; if it is the same, check again
 
 										;clear the screen by restarting the video mode
-		cmp volver_menu, "1"
-		je atajo2
 		CALL moverCocodrilo              ; move the two paddles (check for pressing of keys)
 		CALL dibujarCocodrilo         ; draw the two paddles with the updated positions
 		CALL dibujarInterfaz                 ;draw the game User Interface
 		JMP CHECK_TIME                   ; after everything checks time again
 
 		call EXIT_GAME
-		jmp comienzo
 		instrucciones:
 			;---------prueba color-------
 				mov bh, 10
@@ -342,15 +338,14 @@
 		MOV AH,00h
 		INT 16h
 
-		cmp AL,70
+		cmp AL,70h
 		je volverr
-		cmp al, 50 ;(P y p)
+		cmp al,50h ;(P y p)
 		je volverr
-		jmp seguir
+		jmp seguirr
 		volverr:
-		mov dl, offset volver_menu
-		mov dl, "1"
-		seguir:
+			call EXIT_GAME
+		seguirr:
 		; if it is 'a' or 'A' move left
 		CMP AL,61h ; 'a'
 		JE moverIzquierda
