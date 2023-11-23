@@ -17,7 +17,7 @@
 		bandas_pantalla DW 6               ; variable used to check collisions early
 		
 		origenX DW 0A0h  ;posiciones de origen          DONDE SE RESETEA AL CHOCAR
-		origenY DW 00Ah                                 ;HAY QUE CAMBIARLO PARA QUE CAIGA DEL TECHO
+		origenY DW 00Ah                                 
 
 		;pelota santi
 		posX		  DW 0A0h	;columna  (centrado)
@@ -40,6 +40,32 @@
 		scoreTitle db "SCORE: ", 24h
 		vidas db ' x5',24h
 		heart db 03h, 24h
+		
+		MenuPausa 	db "",0dh,0ah
+					db "",0dh,0ah
+					db "     ________ _______ _____  ____________________",0dh,0ah
+					db "     ___  __ \___    |__  / / /__  ___/___  ____/",0dh,0ah
+					db "     __  /_/ /__  /| |_  / / / _____ \ __  __/   ",0dh,0ah
+					db "     _  ____/ _  ___ |/ /_/ /  ____/ / _  /___   ",0dh,0ah
+					db "     /_/      /_/  |_|\____/   /____/  /_____/   ",0dh,0ah
+					db "                                                 ",0dh,0ah
+					db "",0dh,0ah
+					db "",0dh,0ah
+					db "",0dh,0ah
+					db "       1: RESUME",0dh,0ah
+					db "",0dh,0ah
+					db "       2: RETRY ",0dh,0ah
+					db "",0dh,0ah
+					db "       3: MAIN MENU",0dh,0ah
+					db "",0dh,0ah
+					db "",0dh,0ah
+					db "",0dh,0ah
+					db "",0dh,0ah
+					db "",0dh,0ah
+					db "",0dh,0ah
+					db "",0dh,0ah
+					db "",0dh,0ah,24h
+		opcionPausa db "x",24h
 
 .code
 
@@ -66,7 +92,9 @@
 	public muevoPelota
 	public posicionInicial
 	public dibujoPelota
+	public MENUPAUSE
 	extrn EXIT_GAME:proc
+	extrn resume:proc
 	
 	;==========================================================================
 	
@@ -439,7 +467,7 @@
 		je volverr
 		jmp seguirr
 		volverr:
-			call EXIT_GAME
+			call MENUPAUSE
 		seguirr:
 		; if it is 'a' or 'A' move left
 		CMP AL,61h ; 'a'
@@ -485,6 +513,130 @@
 
 		RET
 	moverCocodrilo ENDP
+	
+	;==========================================================================
+	
+	MENUPAUSE proc 
+			MOV AH,00h                  ; set the configuration to video mode
+			MOV AL,02h                  ; choose the video mode
+			INT 10h                     ; execute the configuration
+			
+			mov bh, 0     ; Página de video (normalmente 0)
+			push bx
+			mov dh, 0     ; Fila
+			mov dl, 0     ; Columna
+			push dx
+
+			call moverCursorIzq
+
+			call limpiarPantalla
+			;---------prueba color-------
+			mov bh, 10
+			push bx
+			mov ch, 0							; Punto inicial hacia abajo
+			mov cl, 0							; Punto inicial hacia la derecha
+			push cx
+			mov dh, 50							; Filas 
+			mov dl, 80 							; Columnas
+			push dx
+			call pruebaColor
+			;---------fin prueba---------
+
+			mov bx, offset MenuPausa
+			push bx
+			call imprimir
+			
+			mov bh, 0  				
+			push bx					
+			mov dh, 8 				
+			mov dl, 8 				
+			push dx					 
+			call moverCursorIzq ;Mueve el cursor al final del programa
+
+			cargas:
+		;---------carga de la opcion---------¿
+			mov bx, offset opcionpausa
+			mov dl, 1
+			mov ah, 1
+			call carga
+		;---------fin de la carga de la opcion---------
+
+		;---------limpiado de pantalla--------
+			; Mueve el cursor a la esquina superior izquierda
+
+			mov bh, 0     ; Página de video (normalmente 0)
+			push bx
+			mov dh, 0     ; Fila
+			mov dl, 0     ; Columna
+			push dx
+			call moverCursorIzq
+
+			call limpiarPantalla
+		;---------fin limpiado----------------
+
+		;---------Comparaciones----------------
+		menuComp:
+			cmp opcionpausa, '1'
+			je Eresumen
+
+			cmp opcionpausa, '2'
+			je Ereset
+			
+
+			cmp opcionpausa, '3'
+			je Ereset
+			
+
+			jmp cargas
+			Eresumen:
+			call resume
+			Ereset:
+			call resetear
+		ret
+	MENUPAUSE ENDP
+	 
+resetear PROC
+    ; Inicializar puntos_texto con '0000'
+    MOV SI, OFFSET puntos_texto
+    MOV CX, 4
+    MOV AL, '5'
+    REPEAT_POINTS:
+        MOV [SI], AL
+        INC SI
+        LOOP REPEAT_POINTS
+	; Inicializar la caida desde el techo
+	mov origenX, 0A0h
+	mov origenY, 00Ah
+
+    ; Inicializar posX, posY, speedX y speedY con valores específicos
+    MOV posX, 0A0h
+    MOV posY, 64h
+    MOV speedX, 05h
+    MOV speedY, 02h
+
+    ; Inicializar cocodrilo_x y cocodrilo_y con valores específicos
+    MOV cocodrilo_x, 87h
+    MOV cocodrilo_y, 0B2h
+
+    ; Inicializar vidas con ' x5'
+    MOV SI, OFFSET vidas
+    MOV byte ptr [SI + 2], '0'
+
+    ; Inicializar heart con 03h (carácter de corazón)
+    MOV heart, 03h
+
+    ; Verificar la opción de pausa y llamar a la función correspondiente
+    CMP opcionpausa, '2'
+    JE Eresume
+    CMP opcionpausa, '3'
+    JE Eexit
+    JMP Eexit ; En caso de que la opción no sea 2 ni 3, salir directamente
+	Eresume:
+		CALL resume
+	Eexit:
+		CALL EXIT_GAME
+    RET
+resetear ENDP
 	
 	;==========================================================================
 
@@ -536,7 +688,7 @@
 
 	;==========================================================================
 
-	limpiar PROC                ; clear the screen by restarting the video mode
+	limpiar PROC               		; clear the screen by restarting the video mode
 
 		MOV AH,00h                    ; set the configuration to video mode
 		MOV AL,13h                    ; choose the video mode
@@ -553,7 +705,6 @@
 	;==========================================================================
 
 	limpiarPantalla proc
-		
 		mov ah, 0fh
 		int 10h
 
