@@ -3,89 +3,82 @@
 .stack 100h
 .data
 	;Datos del Juego
-		ancho_pantalla DW 115h             ; the width of the window (320 pixels)
-		altura_pantalla DW 0C8h            ; the height of the window (200 pixels)
-		bandas_pantalla DW 6               ; variable used to check collisions early
-		
-		volver_menu DB "0"
-
-		tiempo_aux DB 0   
-
+		tiempo_aux 	DB 0   
 
 	;Datos del menu y resto
 		titulo		db "",0dh,0ah
-					db "",0dh,0ah
-					db "	  ______                             ____        __          ",0dh,0ah
-					db "	 /_  __/________ _____ _____ _      / __ )____  / /___ ______",0dh,0ah			
-					db "	  / / / ___/ __ `/ __ `/ __ `/_____/ __  / __ \/ / __ `/ ___/",0dh,0ah
-					db "	 / / / /  / /_/ / /_/ / /_/ /_____/ /_/ / /_/ / / /_/ (__  ) ",0dh,0ah
-					db "	/_/ /_/   \__,_/\__, /\__,_/     /_____/\____/_/\__,_/____/  ",0dh,0ah
-					db "	               /____/                                        ",0dh,0ah
-					db "",0dh,0ah,24h
+				db "",0dh,0ah
+				db "	  ______                             ____        __          ",0dh,0ah
+				db "	 /_  __/________ _____ _____ _      / __ )____  / /___ ______",0dh,0ah			
+				db "	  / / / ___/ __ `/ __ `/ __ `/_____/ __  / __ \/ / __ `/ ___/",0dh,0ah
+				db "	 / / / /  / /_/ / /_/ / /_/ /_____/ /_/ / /_/ / / /_/ (__  ) ",0dh,0ah
+				db "	/_/ /_/   \__,_/\__, /\__,_/     /_____/\____/_/\__,_/____/  ",0dh,0ah
+				db "	               /____/                                        ",0dh,0ah
+				db "",0dh,0ah,24h
 					
 		subt		db "              COCODRILO QUE DUERME ES CARTERA",0dh,0ah,0dh,0ah,24h
 
 		menu		db "",0dh,0ah
-					db "",0dh,0ah
-					db "                             PULSE 1 PARA JUGAR",0dh,0ah
-					db "",0dh,0ah
-					db "                         PULSE 2 PARA INSTRUCCIONES ",0dh,0ah
-					db "",0dh,0ah
-					db "                            PULSE 3 PARA CREDITOS",0dh,0ah
-					db "",0dh,0ah
-					db "                         PULSE 4 PARA SALIR DEL JUEGO",0dh,0ah
-					db "",0dh,0ah
-					db "",0dh,0ah
-					db "",0dh,0ah
-					db "",0dh,0ah,24h
+				db "",0dh,0ah
+				db "                             PULSE 1 PARA JUGAR",0dh,0ah
+				db "",0dh,0ah
+				db "                         PULSE 2 PARA INSTRUCCIONES ",0dh,0ah
+				db "",0dh,0ah
+				db "                            PULSE 3 PARA CREDITOS",0dh,0ah
+				db "",0dh,0ah
+				db "                         PULSE 4 PARA SALIR DEL JUEGO",0dh,0ah
+				db "",0dh,0ah
+				db "",0dh,0ah
+				db "",0dh,0ah
+				db "",0dh,0ah,24h
 
-		instruct		db "",0dh,0ah
-					db "   ___               _                            _                          ",0dh,0ah
-					db "  |_ _|  _ _    ___ | |_   _ _   _  _   __   __  (_)  ___   _ _    ___   ___ ",0dh,0ah
-					db "   | |  | ' \  (_-< |  _| | '_| | || | / _| / _| | | / _ \ | ' \  / -_) (_-< ",0dh,0ah
-					db "  |___| |_||_| /__/  \__| |_|    \_,_| \__| \__| |_| \___/ |_||_| \___| /__/ ",0dh,0ah
-					db "",0dh,0ah
-					db "",0dh,0ah
-					db "",0dh,0ah
-					db "      - EL COCODRILO SE MUEVE CON LAS TECLAS: ('A','D')",0dh,0ah
-					db "      - El OBJETIVO ES: Comerme la mayor cantidad de bolas frescas y limpias ",0dh,0ah
-					db "      - Vas a perder una vida si se te cae una bola.",0dh,0ah
-					db "      - Si perdes los 5 corazones fuiste, sos cartera lacoste",0dh,0ah
-					db "      - En el juego presione 'P' para volver al menu de inicio.",0dh,0ah
-					db "      - Otra instruccion xd",0dh,0ah
-					db "      - Otra instruccion xd",0dh,0ah
-					db "",0dh,0ah
-					db "",0dh,0ah
-					db "",0dh,0ah
-					db "",0dh,0ah
-					db "",0dh,0ah
-					db "",0dh,0ah
-					db "",0dh,0ah
-					db "!INGRESE CUALQUIER NUMERO PARA VOLVER AL MENU! ",0dh,0ah,24h
+	instruct		db "",0dh,0ah
+				db "   ___               _                            _                          ",0dh,0ah
+				db "  |_ _|  _ _    ___ | |_   _ _   _  _   __   __  (_)  ___   _ _    ___   ___ ",0dh,0ah
+				db "   | |  | ' \  (_-< |  _| | '_| | || | / _| / _| | | / _ \ | ' \  / -_) (_-< ",0dh,0ah
+				db "  |___| |_||_| /__/  \__| |_|    \_,_| \__| \__| |_| \___/ |_||_| \___| /__/ ",0dh,0ah
+				db "",0dh,0ah
+				db "",0dh,0ah
+				db "",0dh,0ah
+				db "      - EL COCODRILO SE MUEVE CON LAS TECLAS: ('A','D')",0dh,0ah
+				db "      - El OBJETIVO ES: Comerme la mayor cantidad de bolas frescas y limpias ",0dh,0ah
+				db "      - Vas a perder una vida si se te cae una bola.",0dh,0ah
+				db "      - Si perdes los 5 corazones fuiste, sos cartera lacoste",0dh,0ah
+				db "      - En el juego presione 'P' para volver al menu de inicio.",0dh,0ah
+				db "      - Otra instruccion xd",0dh,0ah
+				db "      - Otra instruccion xd",0dh,0ah
+				db "",0dh,0ah
+				db "",0dh,0ah
+				db "",0dh,0ah
+				db "",0dh,0ah
+				db "",0dh,0ah
+				db "",0dh,0ah
+				db "",0dh,0ah
+				db "!INGRESE CUALQUIER NUMERO PARA VOLVER AL MENU! ",0dh,0ah,24h
 
 		creditos	db"                            _   _   _                      ",0dh,0ah               
-					db"    ___   _ __    ___    __| | (_) | |_    ___    ___      ",0dh,0ah
-					db"   / __| | '__|  / _ \  / _` | | | | __|  / _ \  / __|  o  ",0dh,0ah
-					db"  | (__  | |    |  __/ | (_| | | | | |_  | (_) | \__ \  o  ",0dh,0ah
-					db"   \___| |_|     \___|  \__,_| |_|  \__|  \___/  |___/     ",0dh,0ah
-					db "",0dh,0ah
-					db "",0dh,0ah
-					db "",0dh,0ah
-					db "      -Martina (la jefa) Siscovich",0dh,0ah
-					db "      -Santiago (el amante de microsoft) Rodriguez ",0dh,0ah
-					db "      -Lorenzo (el proplayer de osu) Graizzaro ",0dh,0ah
-					db "      -Damian (el alcoholico) Cabral",0dh,0ah
-					db "      -Agustin (el esclavo del mac) Lopez ",0dh,0ah
-					db "      -julian (el desamparado) barberis",0dh,0ah 
-					db "",0dh,0ah
-					db "",0dh,0ah
-					db "",0dh,0ah
-					db "",0dh,0ah
-					db "",0dh,0ah
-					db "",0dh,0ah
-					db "",0dh,0ah
-					db "",0dh,0ah
-					db "!INGRESE CUALQUIER NUMERO PARA VOLVER AL MENU! ",0dh,0ah,24h
+				db"    ___   _ __    ___    __| | (_) | |_    ___    ___      ",0dh,0ah
+				db"   / __| | '__|  / _ \  / _` | | | | __|  / _ \  / __|  o  ",0dh,0ah
+				db"  | (__  | |    |  __/ | (_| | | | | |_  | (_) | \__ \  o  ",0dh,0ah
+				db"   \___| |_|     \___|  \__,_| |_|  \__|  \___/  |___/     ",0dh,0ah
+				db "",0dh,0ah
+				db "",0dh,0ah
+				db "",0dh,0ah
+				db "      -Martina (la jefa) Siscovich",0dh,0ah
+				db "      -Santiago (el amante de microsoft) Rodriguez ",0dh,0ah
+				db "      -Lorenzo (el proplayer de osu) Graizzaro ",0dh,0ah
+				db "      -Damian (el alcoholico) Cabral",0dh,0ah
+				db "      -Agustin (el esclavo del mac) Lopez ",0dh,0ah
+				db "      -julian (el desamparado) barberis",0dh,0ah 
+				db "",0dh,0ah
+				db "",0dh,0ah
+				db "",0dh,0ah
+				db "",0dh,0ah
+				db "",0dh,0ah
+				db "",0dh,0ah
+				db "",0dh,0ah
+				db "",0dh,0ah
+				db "!INGRESE CUALQUIER NUMERO PARA VOLVER AL MENU! ",0dh,0ah,24h
 
 		error 		db "INGRESE UNA OPCION VALIDA.",0dh,0ah,24h
 		
@@ -103,6 +96,9 @@
 	extrn dibujarInterfaz:proc
 	extrn dibujarCocodrilo:proc
 	public EXIT_GAME
+	extrn muevoPelota:proc
+	extrn posicionInicial:proc
+	extrn dibujoPelota:proc
 
 	main proc
 		mov ax, @data 
@@ -211,22 +207,27 @@
 		jmp finprograma
 		jugar:
 		CALL limpiar			; set initial video mode configurations
-		jmp CHECK_TIME  
+		jmp chequeoTiempo  
 
-		CHECK_TIME:
-		;se ve si sigue activo el juego
-		ok:
-			MOV AH,2Ch                 ; get the system time
-			INT 21h                    ; CH = hour CL = minute DH = second DL = 1/100 seconds
+		chequeoTiempo:
+		    mov ah, 2Ch	;tiempo del sistema
+		    int 21h		;CH:hora CL:minuto DH:segundo DL:1/100segs
 
-			CMP DL,tiempo_aux          ; is the current time equal to the previous one(tiempo_aux)?
-			JE CHECK_TIME              ; if it is the same, check again
+		    cmp dl, tiempo_aux
+		    je chequeoTiempo	;si es el mismo tiempo, lo cheuqea de nuevo
+		    mov tiempo_aux, dl 	;actualizo tiempo
 
-										;clear the screen by restarting the video mode
-		CALL moverCocodrilo              ; move the two paddles (check for pressing of keys)
-		CALL dibujarCocodrilo         ; draw the two paddles with the updated positions
-		CALL dibujarInterfaz                 ;draw the game User Interface
-		JMP CHECK_TIME                   ; after everything checks time again
+		    call limpiarPantalla
+
+		    call muevoPelota
+		    call dibujoPelota
+
+		    call moverCocodrilo
+		    call dibujarCocodrilo
+
+		    call dibujarInterfaz
+
+		    jmp chequeoTiempo 
 
 		call EXIT_GAME
 		instrucciones:
