@@ -7,27 +7,41 @@
 	direccionTexto 		dw 00
 	caracteres 			db ("0123456789ABCDEF")
 	ok 		   			db 0
-	modo		  		db 0; 0, TEXTO
-							; 1, DEC
-							; 2, HEX
-							; 3, BIN 
-	cocodrilo_x 		DW 87h                  ; current X position of the left paddle
-	cocodrilo_y 		DW 0B2h                 ; current Y position of the left paddle
-	ancho_cocodrilo 	DW 20h              ; default paddle width
-	altura_cocodrilo	DW 14h             ; default paddle height
-	velocidad_cocodrilo DW 0Fh          ; default paddle velocity
+	modo		  		db 0 			; 0, TEXTO
+										; 1, DEC
+										; 2, HEX
+										; 3, BIN 
+	cocodrilo_x 		DW 87h 			; current X position of the left paddle
+	cocodrilo_y 		DW 0B2h   		; current Y position of the left paddle
+	ancho_cocodrilo 	DW 20h      	; default paddle width
+	altura_cocodrilo	DW 14h      	; default paddle height
+	velocidad_cocodrilo DW 0Fh      	; default paddle velocity
 
-	ancho_pantalla 		DW 115h             ; the width of the window (320 pixels)
-	altura_pantalla 	DW 0C8h            ; the height of the window (200 pixels)
-	bandas_pantalla 	DW 6               ; variable used to check collisions early
+	anchoPantalla   	DW 115h     	;320 pixels
+    largoPantalla   	DW 0C8h  		;200 pixels
+    bordes          	DW 6    		;para chequear colision
 
-	scoreTitle db "SCORE: ", 24h
 
-	vidas db '5',24h
+	scoreTitle 			db "SCORE: ", 24h
 
-	heart db "x <3",24h
+	vidas 				db '5',24h
 
-	puntos_texto DB '0000','$'         ; text with the player two points
+	heart 				db "x <3",24h
+
+	puntos_texto 		DB '0000','$'   ; text with the player two points
+
+	origenX 			DW 0A0h  		;posiciones de origen          DONDE SE RESETEA AL CHOCAR
+    origenY 			DW 00Ah         ;HAY QUE CAMBIARLO PARA QUE CAIGA DEL TECHO
+
+    tiempo_aux 			DB 0 			;variable para chequear si el tiempo cambió
+	;pelota
+	posX		 	 	DW 0A0h			;columna  (centrado)
+	posY		  		DW 64h			;fila     (centrado)
+	tamanioPelota 		DW 04h			;4 pixeles de alto y ancho
+
+	speedX				DW 05h			;velocidad horizontal (innecesario para nuestro caso)
+	speedY				DW 02h			;velocidad vertical
+
 .code
 
 public carga ; Carga caracteres en RAM 
@@ -50,6 +64,88 @@ public limpiar
 public dibujarInterfaz
 public dibujarCocodrilo
 extrn EXIT_GAME:proc
+public muevoPelota
+public posicionInicial
+public dibujoPelota
+
+dibujoPelota proc 
+	
+	mov cx, posX	;columna
+    mov dx, posY	;fila
+
+dibujoH:	;a través de las columnas
+	mov ah, 0Ch	;configuración para dibujar un pixel
+    mov al, 0Fh	;color blanco
+    mov bh, 00h
+    int 10h 		;ejecuto
+
+    inc cx
+    mov ax, cx
+    sub ax, posX
+    cmp ax, tamanioPelota
+    jng dibujoH
+
+    mov cx,posX		;columna inicial
+    inc dx			;avanza línea
+
+    mov ax, dx
+	sub ax, posY
+	cmp ax, tamanioPelota
+	jng dibujoH
+
+    ret
+dibujoPelota endp
+
+
+posicionInicial proc
+    mov ax, origenX
+    mov posX, ax
+
+    mov ax, origenY
+    mov posY, ax
+
+
+    ret
+posicionInicial endp
+
+muevoPelota proc
+;---SI LLEGA A LOS BORDES LATERALES, SE CAMBIA LA DIRECCION X
+    mov ax, speedX
+    add posX, ax        ;velocidad X
+
+    mov ax, bordes
+    cmp posX, ax        ;posX < 0 
+    jl negSpeedX
+
+    mov ax, anchoPantalla
+    sub ax, tamanioPelota   ;posX > bordes- tamanioPelota
+    sub ax, bordes
+    cmp posX, ax
+    jg negSpeedX
+;--
+    mov ax, speedY
+    add posY, ax        ;velocidad Y
+
+;    mov ax, bordes
+;    cmp posY, ax        ;resetamos acá?
+;    jl negSpeedY
+
+    mov ax, largoPantalla
+    sub ax, tamanioPelota   ;o acá? <--- ACÁ SANTI ACÁ
+    sub ax, bordes
+    cmp posY, ax
+    jg resetPos
+
+    ret
+ 
+    resetPos:
+    call posicionInicial
+    ret
+    
+    negSpeedX:
+    neg speedX
+    ret
+muevoPelota endp
 
 dibujarCocodrilo PROC
 	MOV CX,cocodrilo_x          ; set the initial column (X)
@@ -177,7 +273,7 @@ moverCocodrilo PROC               ; process movement of the paddles
 		MOV AX,velocidad_cocodrilo
 		SUB cocodrilo_x,AX
 
-		MOV AX,bandas_pantalla
+		MOV AX,bordes
 		CMP cocodrilo_x,AX
 		JL arreglarPosicionIzq
 		JMP finMovimiento
@@ -191,8 +287,8 @@ moverCocodrilo PROC               ; process movement of the paddles
 		MOV AX,velocidad_cocodrilo
 		ADD cocodrilo_x,AX
 
-		MOV AX,ancho_pantalla
-		SUB AX,bandas_pantalla
+		MOV AX,anchoPantalla
+		SUB AX,bordes
 		SUB AX,ancho_cocodrilo
 		CMP cocodrilo_x,AX
 		JG ArreglarPosicionDer
@@ -392,8 +488,8 @@ pruebaColor proc
 	mov bx, ss:[bp+8]
 	mov si, ss:[bp+6]
 	mov di, ss:[bp+4]
-
-   	mov ax, 0600h
+	
+	mov ax, 0600h
 	int 10h
 
     pop ax
@@ -405,4 +501,3 @@ pruebaColor proc
 pruebaColor endp
 
 end
-
