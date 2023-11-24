@@ -115,7 +115,7 @@ inicio2 db"                                              _           _        ",
 					db "      -Lorenzo (el proplayer de osu) Graizzaro ",0dh,0ah
 					db "      -Damian (el alcoholico) Cabral",0dh,0ah
 					db "      -Agustin (el esclavo del mac) Lopez ",0dh,0ah
-					db "      -julian (el desamparado) barberis",0dh,0ah 
+					db "      -Julian (el desamparado) Barberis",0dh,0ah 
 					db "",0dh,0ah
 					db "",0dh,0ah
 					db "",0dh,0ah
