@@ -21,7 +21,7 @@
 
 		;pelota santi
 		posX		  DW 0A0h	;columna  (centrado)
-		posY		  DW 64h	;fila     (centrado)
+		posY		  DW 05h	;fila     (centrado)
 		tamanioPelota DW 04h	;4 pixeles de alto y ancho
 
 		speedX	DW 05h	;velocidad horizontal (innecesario para nuestro caso)
@@ -36,7 +36,7 @@
 		PADDLE_HEIGHT DW 10h            ; default paddle height
 		PADDLE_VELOCITY DW 0Fh          ; default paddle velocity
 
-		CROCO_INICIO_X DW 87h            ; current X position of the left paddle
+		CROCO_INICIO_X DW 90h            ; current X position of the left paddle
 		CROCO_INICIO_Y DW 0B2h           ; current Y position of the left paddle
 
 		CROCO_TECHO_WIDTH DW 06h             ; default paddle width
@@ -52,7 +52,7 @@
 
 		ancho_cocodrilo DW 13h              ; default paddle width
 		altura_cocodrilo DW 13h             ; default paddle height
-		velocidad_cocodrilo DW 0Fh          ; default paddle velocity
+		velocidad_cocodrilo DW 12h          ; default paddle velocity
 		;----
 
 		volver_menu DB "0"
@@ -812,7 +812,7 @@
 
 		; Inicializar posX, posY, speedX y speedY con valores específicos
 		MOV posX, 0A0h
-		MOV posY, 64h
+		MOV posY, 05h
 		MOV speedX, 05h
 		MOV speedY, 02h
 
