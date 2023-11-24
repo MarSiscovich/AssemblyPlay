@@ -28,16 +28,19 @@
 		speedY	DW 02h	;velocidad vertical
 		
 		;----cocodrilo julian
-		PADDLE__X DW 7Fh            ; current X position of the left paddle
-		PADDLE__Y DW 0B9h           ; current Y position of the left paddle
+		PADDLE__X DW 84h            ; current X position of the left paddle
+		PADDLE__Y DW 0B1h           ; current Y position of the left paddle
 		PLAYER_ONE_POINTS DB 0           ; current points of the left player (player one)
 
-		PADDLE_WIDTH DW 20h             ; default paddle width
-		PADDLE_HEIGHT DW 10h            ; default paddle height
-		PADDLE_VELOCITY DW 0Fh          ; default paddle velocity
+		PADDLE_WIDTH DW 1Fh             ; default paddle width
+		PADDLE_HEIGHT DW 01h            ; default paddle height
 
-		CROCO_INICIO_X DW 90h            ; current X position of the left paddle
-		CROCO_INICIO_Y DW 0B2h           ; current Y position of the left paddle
+		ACC_AUX DW 0
+
+		PADDLE_VELOCITY DW 12h          ; default paddle velocity
+
+		CROCO_INICIO_X DW 00h            ; current X position of the left paddle
+		CROCO_INICIO_Y DW 00h           ; current Y position of the left paddle
 
 		CROCO_TECHO_WIDTH DW 06h             ; default paddle width
 
@@ -50,9 +53,9 @@
 		CROCO_BOCA_X DW 00h
 		CROCO_BOCA_Y DW 00h
 
-		ancho_cocodrilo DW 13h              ; default paddle width
-		altura_cocodrilo DW 13h             ; default paddle height
-		velocidad_cocodrilo DW 12h          ; default paddle velocity
+		ancho_cocodrilo DW 1Fh              ;(TAMAÑO REAL 11X11) 
+		altura_cocodrilo DW 13h             ; 
+		velocidad_cocodrilo DW 12h 
 		;----
 
 		volver_menu DB "0"
@@ -393,20 +396,20 @@
 		chequeoColision:        ;colisión con paddle
 		mov ax, posX
 		add ax, tamanioPelota
-		cmp ax, CROCO_INICIO_X 
+		cmp ax, PADDLE__X 
 		jng noColision
 
-		mov ax, CROCO_INICIO_X 
+		mov ax, PADDLE__X  
 		add ax, ancho_cocodrilo
 		cmp posX, ax
 		jnl noColision
 
 		mov ax, posY
 		add ax, tamanioPelota
-		cmp ax, CROCO_LADOD_Y
+		cmp ax, PADDLE__Y
 		jng noColision
 
-		mov ax, CROCO_LADOD_Y
+		mov ax, PADDLE__Y
 		add ax, altura_cocodrilo
 		cmp posY, ax
 		jnl noColision
@@ -477,31 +480,31 @@
 	MoverIzquierda:
 		CALL limpiar
 		MOV AX,velocidad_cocodrilo
-		SUB CROCO_INICIO_X,AX
+		SUB PADDLE__X,AX
 
 		MOV AX,bandas_pantalla
-		CMP CROCO_INICIO_X,AX
+		CMP PADDLE__X,AX
 		JL arreglarPosicionIzq
 		JMP finMovimiento
 
 		arreglarPosicionIzq:
-			MOV CROCO_INICIO_X,AX
+			MOV PADDLE__X,AX
 			JMP finMovimiento
 
 	moverDerecha:
 		CALL limpiar
 		MOV AX,velocidad_cocodrilo
-		ADD CROCO_INICIO_X,AX
+		ADD PADDLE__X,AX
 
 		MOV AX,ancho_pantalla
 		SUB AX,bandas_pantalla
 		SUB AX,ancho_cocodrilo
-		CMP CROCO_INICIO_X,AX
+		CMP PADDLE__X,AX
 		JG ArreglarPosicionDer
 		JMP finMovimiento
 
 		ArreglarPosicionDer:
-			MOV CROCO_INICIO_X,AX
+			MOV PADDLE__X,AX
 
 		finMovimiento:
 
@@ -511,43 +514,82 @@
 	;==========================================================================
 
 	dibujarCocodrilo PROC
-		MOV CX, CROCO_INICIO_X         ; set the initial column (X)
-		MOV DX, CROCO_INICIO_Y         ; set the initial line (Y)
 
-		DRAW_CROCO_T:
-			
+		;;;;;;
+		;;;DIBUJO PADDLE
+		;;;;;;
+
+		MOV CX, PADDLE__X        ; set the initial column (X)
+		MOV DX, PADDLE__Y        ; set the initial line (Y)
+
+		DRAW_PADDLE:
+		
 			CALL IMP_PIXEL
 			INC CX
 									
-			MOV AX, CX                      ;CX = CX + 1
-			SUB AX, CROCO_INICIO_X          ;CX - CROCO_BASE_X > WIDTH_CROCO_BASE (TRUE == VAMOS A LA SIGUIENTE LINEA, 
-			CMP AX, CROCO_TECHO_WIDTH      ;                                      FALSE == CONTINUAMOS CON LA SIGUIENTE COLUMNA)
-			JNG DRAW_CROCO_T
-		
-		;;;;;;
-		INC DX 
+        	MOV AX, CX
+			SUB AX, PADDLE__X          
+			CMP AX, PADDLE_WIDTH      
+			JNG DRAW_PADDLE
+
+		MOV CX, PADDLE__X        ; set the initial column (X)
+		MOV DX, PADDLE__Y        ; set the initial line (Y)
+
+		ADD CX, 0Dh
+		INC DX
+
+		;;GUARDO POSICION DE INICIO DE COCODRILO
+		MOV CROCO_INICIO_X, CX 
+		MOV CROCO_INICIO_Y, DX 
+		;;
+
+		CALL IMP_PIXEL
+
+		INC CX 
+		CALL IMP_PIXEL
+
+		INC CX 
+		CALL IMP_PIXEL
+
+		INC CX 
+		CALL IMP_PIXEL
+
+		INC CX 
+		CALL IMP_PIXEL
+
+		INC CX 
+		CALL IMP_PIXEL
+
+		INC CX 
 		CALL IMP_PIXEL
 
 		INC CX
 		INC DX
 		CALL IMP_PIXEL
 
-		;;;;;
-		MOV CROCO_LADOD_X, CX
-		MOV CROCO_LADOD_Y, DX 
-		DRAW_CROCO_LADO_D:
+		INC CX
+		INC DX
+		CALL IMP_PIXEL
 
-			INC DX
-			CALL IMP_PIXEL
+		INC DX
+		CALL IMP_PIXEL
 
-			MOV AX, DX
-			SUB AX, CROCO_LADOD_Y
-			CMP AX, CROCO_LADO_HEIGHT
-			JNG DRAW_CROCO_LADO_D
+		INC DX
+		CALL IMP_PIXEL
+
+		INC DX
+		CALL IMP_PIXEL
+
+		INC DX
+		CALL IMP_PIXEL
+
+		INC DX
+		CALL IMP_PIXEL
 
 		;;;;;;
 		;GUARDO LA POSICION PARA DESPUES DIBUJAR LA BOCA
 		;;;;;;
+
 		MOV CROCO_BOCA_X, CX
 		MOV CROCO_BOCA_Y, DX
 		;;;;;
@@ -655,8 +697,6 @@
 		;;;;;;
 		;BOCA DE IZQUIERDA A DERECHA
 		;;;;;;
-		;;;;;;
-		;;;;;
 
 		MOV CX, CROCO_BOCA_X
 		MOV DX, CROCO_BOCA_Y
@@ -698,7 +738,10 @@
 		DEC CX 
 		DEC DX
 		CALL IMP_PIXEL
+
 		ret
+
+
 	dibujarCocodrilo ENDP
 	
 	;==========================================================================
@@ -817,8 +860,8 @@
 		MOV speedY, 02h
 
 		; Inicializar cocodrilo_x y cocodrilo_y con valores específicos
-		MOV CROCO_INICIO_X, 87h
-		MOV CROCO_INICIO_Y, 0B2h
+		MOV PADDLE__X, 84h
+		MOV PADDLE__Y, 0B1h
 
 		; Inicializar vidas con ' x5'
 		MOV SI, OFFSET vidas
