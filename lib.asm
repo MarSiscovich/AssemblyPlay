@@ -17,9 +17,9 @@
 
 		;Datos del Juego
 		puntos db 0
-		ancho_pantalla DW 115h             ; the width of the window (320 pixels)
-		altura_pantalla DW 0C8h            ; the height of the window (200 pixels)
-		bandas_pantalla DW 6               ; variable used to check collisions early
+		ancho_pantalla DW 115h             ;  (320 pixels)
+		altura_pantalla DW 0C8h            ;  (200 pixels)
+		bandas_pantalla DW 6               ; 
 		
 		origenX DW 0A0h  ;posiciones de origen          DONDE SE RESETEA AL CHOCAR
 		origenY DW 00Ah                                 
@@ -33,39 +33,26 @@
 		speedY	DW 02h	;velocidad vertical
 		
 		;----cocodrilo julian
-		PADDLE__X DW 84h            ; current X position of the left paddle
-		PADDLE__Y DW 0B1h           ; current Y position of the left paddle
-		PLAYER_ONE_POINTS DB 0           ; current points of the left player (player one)
+		PADDLE__X DW 84h            
+		PADDLE__Y DW 0B1h            
 
-		PADDLE_WIDTH DW 1Fh             ; default paddle width
-		PADDLE_HEIGHT DW 01h            ; default paddle height
 
-		ACC_AUX DW 0
+		PADDLE_WIDTH DW 1Fh                                  
 
-		PADDLE_VELOCITY DW 12h          ; default paddle velocity
-
-		CROCO_INICIO_X DW 00h            ; current X position of the left paddle
-		CROCO_INICIO_Y DW 00h           ; current Y position of the left paddle
-
-		CROCO_TECHO_WIDTH DW 06h             ; default paddle width
-
-		CROCO_LADOD_X DW 00h            ; current X position of the left paddle
-		CROCO_LADOD_Y DW 00h            ; current X position of the left paddle
-
-		CROCO_LADO_HEIGHT DW 04h 
-		CROCO_BASE_WIDTH DW 03h  
-
+		CROCO_INICIO_X DW 00h            
+		CROCO_INICIO_Y DW 00h                      
+  
 		CROCO_BOCA_X DW 00h
 		CROCO_BOCA_Y DW 00h
 
-		ancho_cocodrilo DW 1Fh              ;(TAMAÑO REAL 11X11) 
-		altura_cocodrilo DW 13h             ; 
+		ancho_cocodrilo DW 1Fh              
+		altura_cocodrilo DW 13h              
 		velocidad_cocodrilo DW 12h 
 		;----
 
 		volver_menu DB "0"
 		tiempo_aux DB 0   
-		puntos_texto DB '000','$'         ; text with the player two points
+		puntos_texto DB '000','$'         
 		scoreTitle db "SCORE: ", 24h
 		vidas1 db ' x',24h
 		vidas2 db '1',24h
@@ -168,9 +155,9 @@
 	;==========================================================================
 	
 	gameover proc
-			MOV AH,00h                  ; set the configuration to video mode
-			MOV AL,02h                  ; choose the video mode
-			INT 10h                     ; execute the configuration
+			MOV AH,00h                  ; SET CONFIGURACION DE VIDEO
+			MOV AL,02h                  ; MODO DE VIDEO
+			INT 10h                     ; 
 			
 			mov bh, 0     ; Página de video (normalmente 0)
 			push bx
@@ -613,33 +600,30 @@
 
 	;==========================================================================
 
-	moverCocodrilo PROC               ; process movement of the paddles
-		; Left paddle movement
-
-		; check if any key is being pressed (if not check the other paddle)
+	moverCocodrilo PROC               
+		
 		MOV AH,01h
 		INT 16h
-		JZ finMovimiento ; ZF = 1, JZ -> Jump If Zero
+		JZ finMovimiento 
 
-		; check which key is being pressed (AL = ASCII character)
 		MOV AH,00h
 		INT 16h
 
 		cmp AL,70h
 		je volverr
-		cmp al,50h ;(P y p)
+		cmp al,50h 
 		je volverr
 		jmp seguirr
 		volverr:
 			call MENUPAUSE
 		seguirr:
-		; if it is 'a' or 'A' move left
+		; 'a' or 'A' para mover izquierda
 		CMP AL,61h ; 'a'
 		JE moverIzquierda
 		CMP AL,41h ; 'A'
 		JE moverIzquierda
 
-		; if it is 'd' or 'D' move right
+		; 'd' or 'D' para mover derecha
 		CMP AL,64h ; 'd'
 		JE moverDerecha
 		CMP AL,44h ; 'D'
@@ -688,8 +672,8 @@
 		;;;DIBUJO PADDLE
 		;;;;;;
 
-		MOV CX, PADDLE__X        ; set the initial column (X)
-		MOV DX, PADDLE__Y        ; set the initial line (Y)
+		MOV CX, PADDLE__X        ; columna inicial (x)
+		MOV DX, PADDLE__Y        ; fila inicial (y)
 
 		DRAW_PADDLE:
 		
@@ -701,8 +685,8 @@
 			CMP AX, PADDLE_WIDTH      
 			JNG DRAW_PADDLE
 
-		MOV CX, PADDLE__X        ; set the initial column (X)
-		MOV DX, PADDLE__Y        ; set the initial line (Y)
+		MOV CX, PADDLE__X         
+		MOV DX, PADDLE__Y        
 
 		ADD CX, 0Dh
 		INC DX
@@ -917,9 +901,9 @@
 
 	IMP_PIXEL PROC
 
-		MOV AH,0Ch                    ; set the configuration to writing a pixel
-		MOV AL,0Fh                    ; choose white as color
-		MOV BH,00h                    ; set the page number
+		MOV AH,0Ch                    
+		MOV AL,0Fh                    
+		MOV BH,00h                    
 		INT 10h
 
 		RET
@@ -929,9 +913,9 @@
 	;==========================================================================
 	
 	MENUPAUSE proc 
-			MOV AH,00h                  ; set the configuration to video mode
-			MOV AL,02h                  ; choose the video mode
-			INT 10h                     ; execute the configuration
+			MOV AH,00h                  
+			MOV AL,02h                 
+			INT 10h                     
 			
 			mov bh, 0     ; Página de video (normalmente 0)
 			push bx
@@ -1055,57 +1039,57 @@
 	;==========================================================================
 
 	dibujarInterfaz PROC
-		;       Draw the points of the right player (player two)
+		;       
 			
-			MOV AH,02h                       ;set cursor position
-			MOV BH,00h                       ;set page number
-			MOV DH,01h                       ;set row 
-			MOV DL,1dh						 ;set column
+			MOV AH,02h                      
+			MOV BH,00h                      
+			MOV DH,01h                      
+			MOV DL,1dh						
 			INT 10h							 
 			
-			MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
-			LEA DX,scoreTitle    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
-			INT 21h                          ;print the string
+			MOV AH,09h                       
+			LEA DX,scoreTitle   
+			INT 21h                          
 
-			MOV AH,02h                       ;set cursor position
-			MOV BH,00h                       ;set page number
-			MOV DH,01h                       ;set row 
-			MOV DL,23h						 ;set column
+			MOV AH,02h                       
+			MOV BH,00h                      
+			MOV DH,01h                       
+			MOV DL,23h						 
 			INT 10h							 
 			
-			MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
-			LEA DX,puntos_texto    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
-			INT 21h                          ;print the string
+			MOV AH,09h                      
+			LEA DX,puntos_texto    
+			INT 21h                          
 			
-			MOV AH,02h                       ;set cursor position
-			MOV BH,00h                       ;set page number
-			MOV DH,17h                       ;set row 
-			MOV DL,23h						 ;set column
+			MOV AH,02h                       
+			MOV BH,00h                      
+			MOV DH,17h                       
+			MOV DL,23h						
 			INT 10h		
 			
-			MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
-			LEA DX,heart    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
-			INT 21h                          ;print the string
+			MOV AH,09h                       
+			LEA DX,heart    
+			INT 21h                         
 			
-			MOV AH,02h                       ;set cursor position
-			MOV BH,00h                       ;set page number
-			MOV DH,17h                       ;set row 
-			MOV DL,24h						 ;set column
+			MOV AH,02h                       
+			MOV BH,00h                     
+			MOV DH,17h                       
+			MOV DL,24h						 
 			INT 10h		
 			
-			MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
-			LEA DX,vidas1    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
-			INT 21h                          ;print the string
+			MOV AH,09h                       
+			LEA DX,vidas1    
+			INT 21h                          
 			
-			MOV AH,02h                       ;set cursor position
-			MOV BH,00h                       ;set page number
-			MOV DH,17h                       ;set row 
-			MOV DL,23h						 ;set column
+			MOV AH,02h                      
+			MOV BH,00h                      
+			MOV DH,17h                      
+			MOV DL,23h						 
 			INT 10h
 
-			MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
-			LEA DX,vidas2    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
-			INT 21h                          ;print the string
+			MOV AH,09h                       
+			LEA DX,vidas2    
+			INT 21h                         
 			
 			RET
 	dibujarInterfaz ENDP
@@ -1139,16 +1123,16 @@
 
 	;==========================================================================
 
-	limpiar PROC               		; clear the screen by restarting the video mode
+	limpiar PROC               		; limpia la pantalla reseteando el modo de video
 
-		MOV AH,00h                    ; set the configuration to video mode
-		MOV AL,13h                    ; choose the video mode
-		INT 10h                       ; execute the configuration
+		MOV AH,00h                  
+		MOV AL,13h                   
+		INT 10h                      
 
-		MOV AH,0Bh                    ; set the configuration
-		MOV BH,00h                    ; to the background color
-		MOV BL,00h                    ; choose black as background color
-		INT 10h                       ; execute the configuration
+		MOV AH,0Bh                    
+		MOV BH,00h                   
+		MOV BL,00h                    
+		INT 10h                      
 
 		RET
 	limpiar ENDP
