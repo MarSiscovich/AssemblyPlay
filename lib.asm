@@ -27,12 +27,33 @@
 		speedX	DW 05h	;velocidad horizontal (innecesario para nuestro caso)
 		speedY	DW 02h	;velocidad vertical
 		
-		cocodrilo_x DW 87h                  ; current X position of the left paddle
-		cocodrilo_y DW 0B2h                 ; current Y position of the left paddle
+		;----cocodrilo julian
+		PADDLE__X DW 7Fh            ; current X position of the left paddle
+		PADDLE__Y DW 0B9h           ; current Y position of the left paddle
+		PLAYER_ONE_POINTS DB 0           ; current points of the left player (player one)
 
-		ancho_cocodrilo DW 20h              ; default paddle width
-		altura_cocodrilo DW 14h             ; default paddle height
-		velocidad_cocodrilo DW 16h          ; default paddle velocity
+		PADDLE_WIDTH DW 20h             ; default paddle width
+		PADDLE_HEIGHT DW 10h            ; default paddle height
+		PADDLE_VELOCITY DW 0Fh          ; default paddle velocity
+
+		CROCO_INICIO_X DW 87h            ; current X position of the left paddle
+		CROCO_INICIO_Y DW 0B2h           ; current Y position of the left paddle
+
+		CROCO_TECHO_WIDTH DW 06h             ; default paddle width
+
+		CROCO_LADOD_X DW 00h            ; current X position of the left paddle
+		CROCO_LADOD_Y DW 00h            ; current X position of the left paddle
+
+		CROCO_LADO_HEIGHT DW 04h 
+		CROCO_BASE_WIDTH DW 03h  
+
+		CROCO_BOCA_X DW 00h
+		CROCO_BOCA_Y DW 00h
+
+		ancho_cocodrilo DW 13h              ; default paddle width
+		altura_cocodrilo DW 13h             ; default paddle height
+		velocidad_cocodrilo DW 0Fh          ; default paddle velocity
+		;----
 
 		volver_menu DB "0"
 		tiempo_aux DB 0   
@@ -93,6 +114,7 @@
 	public posicionInicial
 	public dibujoPelota
 	public MENUPAUSE
+	public IMP_PIXEL
 	extrn EXIT_GAME:proc
 	extrn resume:proc
 	
@@ -342,19 +364,6 @@
 
 	;==========================================================================
 
-	posicionInicial proc
-		mov ax, origenX
-		mov posX, ax
-
-		mov ax, origenY
-		mov posY, ax
-
-
-		ret
-	posicionInicial endp
-
-	;==========================================================================
-
 	muevoPelota proc
 	;---SI LLEGA A LOS BORDES LATERALES, SE CAMBIA LA DIRECCION X
 		mov ax, speedX
@@ -369,7 +378,7 @@
 		sub ax, bandas_pantalla
 		cmp posX, ax
 		jg negSpeedX
-
+	;--
 		mov ax, speedY
 		add posY, ax        ;velocidad Y
 
@@ -377,27 +386,27 @@
 
 		mov ax, altura_pantalla
 		sub ax, tamanioPelota   ;RESETEO POSICION SI TOCA
-		sub ax, bandas_pantalla          ;EL BORDE INFERIOR
+		sub ax, bandas_pantalla        ;EL BORDE INFERIOR
 		cmp posY, ax
 		jg resetPos
 
 		chequeoColision:        ;colisión con paddle
 		mov ax, posX
 		add ax, tamanioPelota
-		cmp ax, cocodrilo_x
+		cmp ax, CROCO_INICIO_X 
 		jng noColision
 
-		mov ax, cocodrilo_x
+		mov ax, CROCO_INICIO_X 
 		add ax, ancho_cocodrilo
 		cmp posX, ax
 		jnl noColision
 
 		mov ax, posY
 		add ax, tamanioPelota
-		cmp ax, cocodrilo_y
+		cmp ax, CROCO_LADOD_Y
 		jng noColision
 
-		mov ax, cocodrilo_y
+		mov ax, CROCO_LADOD_Y
 		add ax, altura_cocodrilo
 		cmp posY, ax
 		jnl noColision
@@ -418,34 +427,17 @@
 	muevoPelota endp
 
 	;==========================================================================
+	
+	posicionInicial proc
+		mov ax, origenX
+		mov posX, ax
 
-	dibujarCocodrilo PROC
-		MOV CX,cocodrilo_x          ; set the initial column (X)
-		MOV DX,cocodrilo_y          ; set the initial line (Y)
+		mov ax, origenY
+		mov posY, ax
 
-		dibujarPixel:
-		MOV AH,0Ch                    ; set the configuration to writing a pixel
-		MOV AL,0Fh                    ; choose white as color
-		MOV BH,00h                    ; set the page number
-		INT 10h                       ; execute the configuration
 
-		INC DX                        ; DX = DX + 1
-		MOV AX,DX                     ; DX - PADDLE_LEFT_Y > PADDLE_HEIGHT (Y -> we exit this procedure, N -> we continue to the next line
-		SUB AX,cocodrilo_y
-		CMP AX,altura_cocodrilo
-		JNG dibujarPixel
-
-		MOV DX,cocodrilo_y          ; the DX register goes back to the initial line
-		INC CX                        ; we advance one column
-
-		MOV AX,CX                     ; CX - PADDLE__X > PADDLE_WIDTH (Y -> We go to the next line, N -> We continue to the next column
-		SUB AX,cocodrilo_x
-		CMP AX,ancho_cocodrilo
-		JNG dibujarPixel   
-		
 		ret
-
-	dibujarCocodrilo ENDP
+	posicionInicial endp
 
 	;==========================================================================
 
@@ -483,36 +475,244 @@
 		JMP finMovimiento
 
 	MoverIzquierda:
+		CALL limpiar
 		MOV AX,velocidad_cocodrilo
-		SUB cocodrilo_x,AX
+		SUB CROCO_INICIO_X,AX
 
 		MOV AX,bandas_pantalla
-		CMP cocodrilo_x,AX
+		CMP CROCO_INICIO_X,AX
 		JL arreglarPosicionIzq
 		JMP finMovimiento
 
 		arreglarPosicionIzq:
-			MOV cocodrilo_x,AX
+			MOV CROCO_INICIO_X,AX
 			JMP finMovimiento
 
 	moverDerecha:
+		CALL limpiar
 		MOV AX,velocidad_cocodrilo
-		ADD cocodrilo_x,AX
+		ADD CROCO_INICIO_X,AX
 
 		MOV AX,ancho_pantalla
 		SUB AX,bandas_pantalla
 		SUB AX,ancho_cocodrilo
-		CMP cocodrilo_x,AX
+		CMP CROCO_INICIO_X,AX
 		JG ArreglarPosicionDer
 		JMP finMovimiento
 
 		ArreglarPosicionDer:
-			MOV cocodrilo_x,AX
+			MOV CROCO_INICIO_X,AX
 
 		finMovimiento:
 
 		RET
 	moverCocodrilo ENDP
+
+	;==========================================================================
+
+	dibujarCocodrilo PROC
+		MOV CX, CROCO_INICIO_X         ; set the initial column (X)
+		MOV DX, CROCO_INICIO_Y         ; set the initial line (Y)
+
+		DRAW_CROCO_T:
+			
+			CALL IMP_PIXEL
+			INC CX
+									
+			MOV AX, CX                      ;CX = CX + 1
+			SUB AX, CROCO_INICIO_X          ;CX - CROCO_BASE_X > WIDTH_CROCO_BASE (TRUE == VAMOS A LA SIGUIENTE LINEA, 
+			CMP AX, CROCO_TECHO_WIDTH      ;                                      FALSE == CONTINUAMOS CON LA SIGUIENTE COLUMNA)
+			JNG DRAW_CROCO_T
+		
+		;;;;;;
+		INC DX 
+		CALL IMP_PIXEL
+
+		INC CX
+		INC DX
+		CALL IMP_PIXEL
+
+		;;;;;
+		MOV CROCO_LADOD_X, CX
+		MOV CROCO_LADOD_Y, DX 
+		DRAW_CROCO_LADO_D:
+
+			INC DX
+			CALL IMP_PIXEL
+
+			MOV AX, DX
+			SUB AX, CROCO_LADOD_Y
+			CMP AX, CROCO_LADO_HEIGHT
+			JNG DRAW_CROCO_LADO_D
+
+		;;;;;;
+		;GUARDO LA POSICION PARA DESPUES DIBUJAR LA BOCA
+		;;;;;;
+		MOV CROCO_BOCA_X, CX
+		MOV CROCO_BOCA_Y, DX
+		;;;;;
+
+		;;;;;
+		INC DX 
+		DEC CX
+		CALL IMP_PIXEL
+
+		INC DX 
+		DEC CX
+		CALL IMP_PIXEL
+
+		INC DX 
+		DEC CX
+		CALL IMP_PIXEL
+
+		;;;;;
+		DEC CX
+		CALL IMP_PIXEL
+
+		DEC CX
+		CALL IMP_PIXEL
+
+		DEC CX
+		CALL IMP_PIXEL
+
+		DEC CX
+		CALL IMP_PIXEL
+
+		;;;;;
+		DEC CX 
+		DEC DX
+		CALL IMP_PIXEL
+
+		DEC CX 
+		DEC DX
+		CALL IMP_PIXEL
+
+		DEC CX 
+		DEC DX
+		CALL IMP_PIXEL
+		;;;;;
+
+		DEC DX
+		CALL IMP_PIXEL
+
+		DEC DX
+		CALL IMP_PIXEL
+
+		DEC DX
+		CALL IMP_PIXEL
+
+		DEC DX
+		CALL IMP_PIXEL
+
+		DEC DX
+		CALL IMP_PIXEL
+		;;;;;
+
+		INC CX
+		DEC DX
+		CALL IMP_PIXEL
+
+		;;;;;;
+		;COMIENZO DIBUJADO INTERIOR
+		;;;;;;
+
+		;;;;;;
+		;OJO IZQUIERDO
+		;;;;;;
+
+		MOV CX, CROCO_INICIO_X
+		MOV DX, CROCO_INICIO_Y
+
+		ADD CX, 01h 
+		ADD DX, 02h
+		CALL IMP_PIXEL
+
+		INC DX
+		CALL IMP_PIXEL
+
+		INC CX 
+		CALL IMP_PIXEL 
+
+		INC DX
+		CALL IMP_PIXEL 
+
+		;;;;;;
+		;OJO DERECHO
+		;;;;;;
+
+		ADD CX, 02h
+		CALL IMP_PIXEL 
+
+		DEC DX 
+		CALL IMP_PIXEL 
+
+		INC CX 
+		CALL IMP_PIXEL 
+
+		DEC DX 
+		CALL IMP_PIXEL 
+
+		;;;;;;
+		;BOCA DE IZQUIERDA A DERECHA
+		;;;;;;
+		;;;;;;
+		;;;;;
+
+		MOV CX, CROCO_BOCA_X
+		MOV DX, CROCO_BOCA_Y
+
+		DEC CX
+		DEC DX
+		CALL IMP_PIXEL
+
+		INC DX 
+		DEC CX
+		CALL IMP_PIXEL
+
+		INC DX 
+		DEC CX
+		CALL IMP_PIXEL
+
+		;;;;;
+		DEC CX
+		CALL IMP_PIXEL
+
+		DEC CX
+		CALL IMP_PIXEL
+
+		DEC CX
+		CALL IMP_PIXEL
+
+		DEC CX
+		CALL IMP_PIXEL
+
+		;;;;;
+		DEC CX 
+		DEC DX
+		CALL IMP_PIXEL
+
+		DEC CX 
+		DEC DX
+		CALL IMP_PIXEL
+
+		DEC CX 
+		DEC DX
+		CALL IMP_PIXEL
+		ret
+	dibujarCocodrilo ENDP
+	
+	;==========================================================================
+
+	IMP_PIXEL PROC
+
+		MOV AH,0Ch                    ; set the configuration to writing a pixel
+		MOV AL,0Fh                    ; choose white as color
+		MOV BH,00h                    ; set the page number
+		INT 10h
+
+		RET
+
+	IMP_PIXEL ENDP 
 	
 	;==========================================================================
 	
@@ -594,49 +794,51 @@
 			call resetear
 		ret
 	MENUPAUSE ENDP
+	
+	;==========================================================================
 	 
-resetear PROC
-    ; Inicializar puntos_texto con '0000'
-    MOV SI, OFFSET puntos_texto
-    MOV CX, 4
-    MOV AL, '0'
-    REPEAT_POINTS:
-        MOV [SI], AL
-        INC SI
-        LOOP REPEAT_POINTS
-	; Inicializar la caida desde el techo
-	mov origenX, 0A0h
-	mov origenY, 00Ah
+	resetear PROC
+		; Inicializar puntos_texto con '0000'
+		MOV SI, OFFSET puntos_texto
+		MOV CX, 4
+		MOV AL, '0'
+		REPEAT_POINTS:
+			MOV [SI], AL
+			INC SI
+			LOOP REPEAT_POINTS
+		; Inicializar la caida desde el techo
+		mov origenX, 0A0h
+		mov origenY, 00Ah
 
-    ; Inicializar posX, posY, speedX y speedY con valores específicos
-    MOV posX, 0A0h
-    MOV posY, 64h
-    MOV speedX, 05h
-    MOV speedY, 02h
+		; Inicializar posX, posY, speedX y speedY con valores específicos
+		MOV posX, 0A0h
+		MOV posY, 64h
+		MOV speedX, 05h
+		MOV speedY, 02h
 
-    ; Inicializar cocodrilo_x y cocodrilo_y con valores específicos
-    MOV cocodrilo_x, 87h
-    MOV cocodrilo_y, 0B2h
+		; Inicializar cocodrilo_x y cocodrilo_y con valores específicos
+		MOV CROCO_INICIO_X, 87h
+		MOV CROCO_INICIO_Y, 0B2h
 
-    ; Inicializar vidas con ' x5'
-    MOV SI, OFFSET vidas
-    MOV byte ptr [SI + 2], '5'
+		; Inicializar vidas con ' x5'
+		MOV SI, OFFSET vidas
+		MOV byte ptr [SI + 2], '5'
 
-    ; Inicializar heart con 03h (carácter de corazón)
-    MOV heart, 03h
+		; Inicializar heart con 03h (carácter de corazón)
+		MOV heart, 03h
 
-    ; Verificar la opción de pausa y llamar a la función correspondiente
-    CMP opcionpausa, '2'
-    JE Eresume
-    CMP opcionpausa, '3'
-    JE Eexit
-    JMP Eexit ; En caso de que la opción no sea 2 ni 3, salir directamente
-	Eresume:
-		CALL resume
-	Eexit:
-		CALL EXIT_GAME
-    RET
-resetear ENDP
+		; Verificar la opción de pausa y llamar a la función correspondiente
+		CMP opcionpausa, '2'
+		JE Eresume
+		CMP opcionpausa, '3'
+		JE Eexit
+		JMP Eexit ; En caso de que la opción no sea 2 ni 3, salir directamente
+		Eresume:
+			CALL resume
+		Eexit:
+			CALL EXIT_GAME
+		RET
+	resetear ENDP
 	
 	;==========================================================================
 
