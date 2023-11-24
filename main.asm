@@ -97,6 +97,7 @@
 	extrn posicionInicial:proc
 	extrn dibujoPelota:proc
 	extrn MENUPAUSE:proc
+	extrn IMP_PIXEL:proc
 	public EXIT_GAME
 	public resume
 
