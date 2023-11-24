@@ -2,6 +2,7 @@
 .model small
 .stack 100h
 .data
+		
 		errorCarga 		db "error en la carga",0dh,0ah,24h
 		cantidadCaracteres 	db 0
 		direccionTexto 		dw 00
@@ -11,7 +12,11 @@
 								; 1, DEC
 								; 2, HEX
 								; 3, BIN 
-	;Datos del Juego
+    
+		
+
+		;Datos del Juego
+		puntos db 0
 		ancho_pantalla DW 115h             ; the width of the window (320 pixels)
 		altura_pantalla DW 0C8h            ; the height of the window (200 pixels)
 		bandas_pantalla DW 6               ; variable used to check collisions early
@@ -60,10 +65,46 @@
 
 		volver_menu DB "0"
 		tiempo_aux DB 0   
-		puntos_texto DB '0000','$'         ; text with the player two points
+		puntos_texto DB '000','$'         ; text with the player two points
 		scoreTitle db "SCORE: ", 24h
-		vidas db ' x5',24h
+		vidas1 db ' x',24h
+		vidas2 db '1',24h
 		heart db 03h, 24h
+		textogameover 	db "",0dh,0ah
+						db "",0dh,0ah
+						db "",0dh,0ah
+						db "",0dh,0ah
+						db "",0dh,0ah
+						db "",0dh,0ah
+						db "",0dh,0ah
+						db "                 _______      ___      .___  ___.  _______ ",0dh,0ah
+						db "                /  _____|    /   \     |   \/   | |   ____|",0dh,0ah
+						db "               |  |  __     /  ^  \    |  \  /  | |  |__   ",0dh,0ah
+						db "               |  | |_ |   /  /_\  \   |  |\/|  | |   __|  ",0dh,0ah
+						db "               |  |__| |  /  _____  \  |  |  |  | |  |____ ",0dh,0ah
+						db "                \______| /__/     \__\ |__|  |__| |_______|",0dh,0ah
+						db "                                                             ",0dh,0ah
+						db "                 ______   ____    ____  _______ .______      ",0dh,0ah
+						db "                /  __  \  \   \  /   / |   ____||   _  \     ",0dh,0ah
+						db "               |  |  |  |  \   \/   /  |  |__   |  |_)  |    ",0dh,0ah
+						db "               |  |  |  |   \      /   |   __|  |      /     ",0dh,0ah
+						db "               |  `--'  |    \    /    |  |____ |  |\  \----.",0dh,0ah
+						db "                \______/      \__/     |_______|| _| `._____|",0dh,0ah
+	
+					db "",0dh,0ah
+					db "",0dh,0ah
+					db "",0dh,0ah
+					db "",0dh,0ah
+					db "       2: RETRY ",0dh,0ah
+					db "",0dh,0ah
+					db "       3: MAIN MENU",0dh,0ah
+					db "",0dh,0ah
+					db "",0dh,0ah
+					db "",0dh,0ah
+					db "",0dh,0ah
+					db "",0dh,0ah
+					db "",0dh,0ah,24h
+
 		
 		MenuPausa 	db "",0dh,0ah
 					db "",0dh,0ah
@@ -92,6 +133,8 @@
 		opcionPausa db "x",24h
 
 .code
+	ORG 100h
+	seed DD 0 ; Semilla para la generación de números aleatorios
 
 	public carga 	; Carga caracteres en RAM 
  		; Carga Finita DL= CANTIDAD o Infinita DL=0
@@ -118,11 +161,87 @@
 	public dibujoPelota
 	public MENUPAUSE
 	public IMP_PIXEL
+	public gameover
 	extrn EXIT_GAME:proc
 	extrn resume:proc
 	
 	;==========================================================================
 	
+	gameover proc
+			MOV AH,00h                  ; set the configuration to video mode
+			MOV AL,02h                  ; choose the video mode
+			INT 10h                     ; execute the configuration
+			
+			mov bh, 0     ; Página de video (normalmente 0)
+			push bx
+			mov dh, 0     ; Fila
+			mov dl, 0     ; Columna
+			push dx
+
+			call moverCursorIzq
+
+			call limpiarPantalla
+			;---------prueba color-------
+			mov bh, 10
+			push bx
+			mov ch, 0							; Punto inicial hacia abajo
+			mov cl, 0							; Punto inicial hacia la derecha
+			push cx
+			mov dh, 50							; Filas 
+			mov dl, 80 							; Columnas
+			push dx
+			call pruebaColor
+			;---------fin prueba---------
+
+			mov bx, offset textogameover
+			push bx
+			call imprimir
+			
+			mov bh, 0  				
+			push bx					
+			mov dh, 8 				
+			mov dl, 8 				
+			push dx					 
+			call moverCursorIzq ;Mueve el cursor al final del programa
+
+			cargas:
+		;---------carga de la opcion---------¿
+			mov bx, offset opcionpausa
+			mov dl, 1
+			mov ah, 1
+			call carga
+		;---------fin de la carga de la opcion---------
+
+		;---------limpiado de pantalla--------
+			; Mueve el cursor a la esquina superior izquierda
+
+			mov bh, 0     ; Página de video (normalmente 0)
+			push bx
+			mov dh, 0     ; Fila
+			mov dl, 0     ; Columna
+			push dx
+			call moverCursorIzq
+
+			call limpiarPantalla
+		;---------fin limpiado----------------
+
+		;---------Comparaciones----------------
+		menuComp:
+			cmp opcionpausa, '2'
+			je Ereset
+			
+
+			cmp opcionpausa, '3'
+			je Ereset
+			
+
+			jmp cargas
+			Eresumen:
+			call resume
+			Ereset:
+			call resetear
+		ret
+	gameover endp
 	carga proc
 			push cx
 			push bx
@@ -273,10 +392,7 @@
 	
 	;==========================================================================
 	
-	random proc 		; PROCESO ALEATORIO - Devuelve en AL un número del 0 al 9 usando los milisegundos del la función TIME$	
-		push cx
-		push dx
-
+	random proc 	
 		mov ah, 2ch
 		int 21h
 		xor ax, ax
@@ -285,9 +401,57 @@
 		div cl
 		xor ah, ah
 
-		pop dx
-		pop cx
+		cmp al, 0
+		je es0
+		cmp al, 1
+		je es1
+		cmp al, 2
+		je es2
+		cmp al, 3
+		je es3
+		cmp al, 4
+		je es4
+		cmp al, 5
+		je es5
+		cmp al, 6
+		je es6
+		cmp al, 7
+		je es7
+		cmp al, 8
+		je es8
+		cmp al, 9
+		je es9
+		es0:
+		mov origenX, 027h
 		ret
+		es1:
+		mov origenX, 032h
+		ret
+		es2:
+		mov origenX, 096h
+		ret
+		es3:
+		mov origenX, 078h
+		ret
+		es4:
+		mov origenX, 055h
+		ret
+		es5:
+		mov origenX, 043h
+		ret
+		es6:
+		mov origenX, 035h
+		ret
+		es7:
+		mov origenX, 09h
+		ret
+		es8:
+		mov origenX, 07h
+		ret
+		es9:
+		mov origenX, 03h
+
+    	ret                
 	random endp
 
 	;==========================================================================
@@ -391,7 +555,7 @@
 		sub ax, tamanioPelota   ;RESETEO POSICION SI TOCA
 		sub ax, bandas_pantalla        ;EL BORDE INFERIOR
 		cmp posY, ax
-		jg resetPos
+		jg cagaste
 
 		chequeoColision:        ;colisión con paddle
 		mov ax, posX
@@ -415,29 +579,34 @@
 		jnl noColision
 
 		;si llegó acá, hubo colisión
+		;+1 punto
+		inc puntos
+		mov bx, offset puntos_texto
+		mov dl, puntos
+		call regtoascii
+		inc speedx
 		jmp resetPos
-		
 		noColision:
 		ret
-
+		cagaste:
+			call GameOver
 		resetPos:
-		call posicionInicial
-		ret
-		
+			call posicionInicial
+			ret
 		negSpeedX:
-		neg speedX
-		ret
+			neg speedX
+			ret
 	muevoPelota endp
 
 	;==========================================================================
 	
 	posicionInicial proc
+		mov origenX, ax
 		mov ax, origenX
 		mov posX, ax
 
 		mov ax, origenY
 		mov posY, ax
-
 
 		ret
 	posicionInicial endp
@@ -796,7 +965,7 @@
 			push dx					 
 			call moverCursorIzq ;Mueve el cursor al final del programa
 
-			cargas:
+			cargas2:
 		;---------carga de la opcion---------¿
 			mov bx, offset opcionpausa
 			mov dl, 1
@@ -818,22 +987,22 @@
 		;---------fin limpiado----------------
 
 		;---------Comparaciones----------------
-		menuComp:
+		menuComp2:
 			cmp opcionpausa, '1'
-			je Eresumen
+			je Eresumen2
 
 			cmp opcionpausa, '2'
-			je Ereset
+			je Ereset2
 			
 
 			cmp opcionpausa, '3'
-			je Ereset
+			je Ereset2
 			
 
 			jmp cargas
-			Eresumen:
+			Eresumen2:
 			call resume
-			Ereset:
+			Ereset2:
 			call resetear
 		ret
 	MENUPAUSE ENDP
@@ -843,7 +1012,7 @@
 	resetear PROC
 		; Inicializar puntos_texto con '0000'
 		MOV SI, OFFSET puntos_texto
-		MOV CX, 4
+		MOV CX, 3
 		MOV AL, '0'
 		REPEAT_POINTS:
 			MOV [SI], AL
@@ -863,9 +1032,9 @@
 		MOV PADDLE__X, 84h
 		MOV PADDLE__Y, 0B1h
 
-		; Inicializar vidas con ' x5'
-		MOV SI, OFFSET vidas
-		MOV byte ptr [SI + 2], '5'
+		; Inicializar vidas con ' x1'
+		MOV SI, OFFSET vidas2
+		MOV byte ptr [SI + 2], '1'
 
 		; Inicializar heart con 03h (carácter de corazón)
 		MOV heart, 03h
@@ -925,11 +1094,48 @@
 			INT 10h		
 			
 			MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
-			LEA DX,vidas    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
+			LEA DX,vidas1    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
+			INT 21h                          ;print the string
+			
+			MOV AH,02h                       ;set cursor position
+			MOV BH,00h                       ;set page number
+			MOV DH,17h                       ;set row 
+			MOV DL,23h						 ;set column
+			INT 10h
+
+			MOV AH,09h                       ;WRITE STRING TO STANDARD OUTPUT
+			LEA DX,vidas2    ;give DX a pointer to the string TEXT_PLAYER_ONE_POINTS
 			INT 21h                          ;print the string
 			
 			RET
 	dibujarInterfaz ENDP
+	
+	regtoascii proc  	; Recibe en bx el offset de una variable de 3 bytes, y el numero a convertir por dl no mayor a 255
+		push ax
+		push dx
+
+		add bx,2
+		xor ax,ax
+		mov al, dl
+		mov dl, 10
+		div dl
+		add [bx],ah
+
+		xor ah,ah
+		dec bx
+			div dl
+		add [bx],ah
+
+		xor ah,ah
+		dec bx
+			div dl
+		add [bx],ah
+
+		pop dx
+		pop ax
+
+		ret
+	regtoascii endp
 
 	;==========================================================================
 
