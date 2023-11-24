@@ -287,11 +287,11 @@
 			int 21h
 	main endp
 
-	EXIT_GAME PROC            		; goes back to the text mode
+	EXIT_GAME PROC            		
 
-		MOV AH,00h                  ; set the configuration to video mode
-		MOV AL,02h                  ; choose the video mode
-		INT 10h                     ; execute the configuration
+		MOV AH,00h                  
+		MOV AL,02h                  
+		INT 10h                     
 
 		jmp comienzo
 
